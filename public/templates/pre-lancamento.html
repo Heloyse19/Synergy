@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>[Nome do Produto] — Lista de espera</title>
+    <style>
+      :root { --brand: #059669; --dark: #022c22; --muted: #475569; }
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background: radial-gradient(circle at top, #d1fae5 0%, #fff 60%); color: var(--dark); min-height: 100vh; display: flex; flex-direction: column; }
+      main { flex: 1; display: grid; place-items: center; padding: 48px 24px; }
+      .box { max-width: 620px; text-align: center; }
+      .pill { display: inline-block; background: #a7f3d0; color: #065f46; padding: 6px 14px; border-radius: 999px; font-weight: 600; font-size: 13px; }
+      h1 { font-size: clamp(34px, 6vw, 56px); line-height: 1.05; margin: 20px 0 12px; }
+      p { font-size: 18px; color: var(--muted); }
+      form { display: flex; gap: 10px; margin: 28px auto 12px; max-width: 460px; }
+      input { flex: 1; padding: 14px 16px; border-radius: 12px; border: 1px solid #cbd5e1; font-size: 16px; }
+      button { padding: 14px 22px; border-radius: 12px; border: 0; background: var(--brand); color: #fff; font-weight: 700; font-size: 16px; cursor: pointer; }
+      small { color: var(--muted); }
+      .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-top: 40px; text-align: left; }
+      .feature { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px; }
+      .feature strong { display: block; margin-bottom: 4px; }
+      footer { text-align: center; padding: 20px; color: var(--muted); font-size: 14px; }
+      @media (max-width: 520px) { form { flex-direction: column; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="box">
+        <span class="pill">Em breve · acesso antecipado</span>
+        <h1>[Nome do Produto]: [benefício principal em poucas palavras]</h1>
+        <p>[Uma frase que explica o que o produto faz e para quem. Convide a pessoa a entrar na lista de espera.]</p>
+        <form action="[URL-do-seu-formulario]" method="post">
+          <input type="email" name="email" placeholder="Seu melhor e-mail" required />
+          <button type="submit">Entrar na lista</button>
+        </form>
+        <small>Sem spam. Avisaremos apenas no lançamento.</small>
+        <div class="features">
+          <div class="feature"><strong>[Benefício 1]</strong><span>[Detalhe curto]</span></div>
+          <div class="feature"><strong>[Benefício 2]</strong><span>[Detalhe curto]</span></div>
+          <div class="feature"><strong>[Benefício 3]</strong><span>[Detalhe curto]</span></div>
+        </div>
+      </div>
+    </main>
+    <footer>© [ano] [Nome da Startup] · Template Synergy</footer>
+  </body>
+</html>

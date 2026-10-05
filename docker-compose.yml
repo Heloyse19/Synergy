@@ -1,0 +1,49 @@
+# Ambiente de DESENVOLVIMENTO.
+#   Só o banco:            docker compose up -d
+#   Banco + app em Docker: docker compose --profile full up --build
+# A aplicação em dev roda no host com `npm run dev` (hot reload) apontando para localhost:3306.
+services:
+  db:
+    image: mysql:8.4
+    container_name: synergy-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: synergy
+      MYSQL_USER: synergy
+      MYSQL_PASSWORD: synergy
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    ports:
+      - '${DB_PORT:-3306}:3306'
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '-uroot', '-proot']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  # Opcional: constrói a imagem de produção e sobe a aplicação junto do banco.
+  app:
+    build: .
+    image: synergy:local
+    profiles: ['full']
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: mysql://synergy:synergy@db:3306/synergy
+      SESSION_SECRET: ${SESSION_SECRET:-segredo-local-apenas-para-testes-com-32-caracteres}
+      APP_URL: http://localhost:3000
+      TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY:-}
+      TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
+      SHOW_DEMO_ACCOUNTS: ${SHOW_DEMO_ACCOUNTS:-true}
+    ports:
+      - '3000:3000'
+
+volumes:
+  db_data:

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>[Nome da Startup] — One-pager</title>
+    <style>
+      :root { --brand: #b45309; --dark: #1c1917; --muted: #57534e; --line: #e7e5e4; }
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: Georgia, 'Times New Roman', serif; color: var(--dark); background: #fafaf9; }
+      .page { max-width: 860px; margin: 32px auto; background: #fff; border: 1px solid var(--line); padding: 48px; }
+      h1 { font-size: 36px; margin: 0; }
+      .sub { color: var(--muted); font-size: 18px; margin: 6px 0 24px; }
+      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+      h2 { font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brand); border-bottom: 2px solid var(--brand); padding-bottom: 6px; margin: 28px 0 10px; }
+      p, li { line-height: 1.6; }
+      .ask { background: #fffbeb; border: 1px solid #fde68a; padding: 18px; border-radius: 10px; margin-top: 28px; }
+      .ask strong { font-size: 22px; display: block; }
+      .contact { margin-top: 28px; font-size: 14px; color: var(--muted); display: flex; gap: 20px; flex-wrap: wrap; }
+      @media print { body { background: #fff; } .page { border: 0; margin: 0; padding: 24px; } }
+      @media (max-width: 640px) { .row { grid-template-columns: 1fr; } .page { padding: 24px; } }
+    </style>
+  </head>
+  <body>
+    <article class="page">
+      <h1>[Nome da Startup]</h1>
+      <p class="sub">[Tagline: o que fazem, para quem, em até 12 palavras]</p>
+
+      <div class="row">
+        <div>
+          <h2>Problema</h2>
+          <p>[Quem sofre com o problema, quanto custa e por que as soluções atuais falham.]</p>
+          <h2>Solução</h2>
+          <p>[Como o produto resolve e qual é o diferencial defensável.]</p>
+          <h2>Modelo de negócio</h2>
+          <p>[Como a startup ganha dinheiro: assinatura, take rate, licença...]</p>
+        </div>
+        <div>
+          <h2>Mercado</h2>
+          <p>[TAM / SAM / SOM com fontes.]</p>
+          <h2>Tração</h2>
+          <ul>
+            <li>[Métrica 1 — ex.: 1.200 clientes ativos]</li>
+            <li>[Métrica 2 — ex.: MRR de R$ 120 mil]</li>
+            <li>[Métrica 3 — ex.: NPS 72]</li>
+          </ul>
+          <h2>Time</h2>
+          <p>[Fundadores e por que são as pessoas certas para este problema.]</p>
+        </div>
+      </div>
+
+      <div class="ask">
+        <strong>Captando R$ [valor] em rodada anjo</strong>
+        [Uso do capital: % produto, % vendas e marketing, % time. Runway previsto: [n] meses.]
+      </div>
+
+      <div class="contact">
+        <span>[nome@startup.com]</span>
+        <span>[site.com.br]</span>
+        <span>[cidade/UF]</span>
+      </div>
+    </article>
+  </body>
+</html>

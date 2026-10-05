@@ -1,0 +1,171 @@
+// Synergy — modelo de dados (cole em https://dbdiagram.io)
+// Gerado a partir de prisma/schema.prisma. Mantenha os dois em sincronia.
+
+Project synergy {
+  database_type: 'MySQL'
+  Note: 'Plataforma que conecta startups, profissionais e investidores anjo'
+}
+
+Enum Role { STARTUP INVESTOR PROFESSIONAL ADMIN }
+Enum Plan { FREE PREMIUM }
+Enum StartupStage { IDEA VALIDATION MVP TRACTION SCALE }
+Enum EventType { HACKATHON MEETUP PITCH_DAY WORKSHOP DEMO_DAY OTHER }
+Enum EventOrigin { INTERNAL EXTERNAL }
+Enum JobType { CLT PJ FREELANCE INTERNSHIP }
+Enum WorkMode { REMOTE HYBRID ONSITE }
+
+Table User {
+  id varchar(191) [pk]
+  name varchar(191) [not null]
+  email varchar(191) [not null, unique]
+  passwordHash varchar(191) [not null]
+  role Role [not null]
+  plan Plan [not null, default: 'FREE']
+  planActivatedAt datetime
+  createdAt datetime [not null, default: `now()`]
+  updatedAt datetime [not null]
+}
+
+Table Niche {
+  id int [pk, increment]
+  name varchar(191) [not null, unique]
+  slug varchar(191) [not null, unique]
+}
+
+Table StartupProfile {
+  id varchar(191) [pk]
+  userId varchar(191) [not null, unique, ref: - User.id]
+  name varchar(191) [not null]
+  pitch varchar(280)
+  description text
+  website varchar(191)
+  city varchar(191)
+  stage StartupStage [not null, default: 'IDEA']
+  nicheId int [ref: > Niche.id]
+  createdAt datetime [not null, default: `now()`]
+  updatedAt datetime [not null]
+}
+
+Table InvestorProfile {
+  id varchar(191) [pk]
+  userId varchar(191) [not null, unique, ref: - User.id]
+  company varchar(191)
+  thesis text
+  ticketMin int
+  ticketMax int
+  linkedin varchar(191)
+  createdAt datetime [not null, default: `now()`]
+  updatedAt datetime [not null]
+}
+
+Table ProfessionalProfile {
+  id varchar(191) [pk]
+  userId varchar(191) [not null, unique, ref: - User.id]
+  headline varchar(191)
+  bio text
+  skills varchar(191) [note: 'separadas por vírgula']
+  linkedin varchar(191)
+  portfolio varchar(191)
+  availableForFreelance boolean [not null, default: true]
+  createdAt datetime [not null, default: `now()`]
+  updatedAt datetime [not null]
+}
+
+Table Event {
+  id varchar(191) [pk]
+  title varchar(191) [not null]
+  description text [not null]
+  type EventType [not null]
+  origin EventOrigin [not null, default: 'INTERNAL']
+  startsAt datetime [not null]
+  endsAt datetime
+  location varchar(191)
+  isOnline boolean [not null, default: false]
+  externalUrl varchar(191)
+  capacity int
+  priorityUntil datetime [note: 'até esta data só Premium se inscreve']
+  organizerId varchar(191) [not null, ref: > User.id]
+  createdAt datetime [not null, default: `now()`]
+  updatedAt datetime [not null]
+
+  indexes {
+    startsAt
+  }
+}
+
+Table EventAttendance {
+  id varchar(191) [pk]
+  eventId varchar(191) [not null, ref: > Event.id]
+  userId varchar(191) [not null, ref: > User.id]
+  createdAt datetime [not null, default: `now()`]
+
+  indexes {
+    (eventId, userId) [unique]
+    userId
+  }
+}
+
+Table JobPosting {
+  id varchar(191) [pk]
+  startupId varchar(191) [not null, ref: > StartupProfile.id]
+  title varchar(191) [not null]
+  description text [not null]
+  type JobType [not null]
+  workMode WorkMode [not null]
+  location varchar(191)
+  salaryRange varchar(191)
+  skills varchar(191)
+  isActive boolean [not null, default: true]
+  createdAt datetime [not null, default: `now()`]
+  updatedAt datetime [not null]
+
+  indexes {
+    (isActive, createdAt)
+    startupId
+  }
+}
+
+Table ForumPost {
+  id varchar(191) [pk]
+  authorId varchar(191) [not null, ref: > User.id]
+  title varchar(191) [not null]
+  content text [not null]
+  createdAt datetime [not null, default: `now()`]
+  updatedAt datetime [not null]
+}
+
+Table ForumReply {
+  id varchar(191) [pk]
+  postId varchar(191) [not null, ref: > ForumPost.id]
+  authorId varchar(191) [not null, ref: > User.id]
+  content text [not null]
+  createdAt datetime [not null, default: `now()`]
+}
+
+Table RoadmapStep {
+  id int [pk, increment]
+  order int [not null]
+  phase varchar(191) [not null]
+  title varchar(191) [not null]
+  description text [not null]
+  resourceUrl varchar(191)
+}
+
+Table RoadmapProgress {
+  id varchar(191) [pk]
+  startupId varchar(191) [not null, ref: > StartupProfile.id]
+  stepId int [not null, ref: > RoadmapStep.id]
+  completedAt datetime [not null, default: `now()`]
+
+  indexes {
+    (startupId, stepId) [unique]
+  }
+}
+
+Table LandingPageTemplate {
+  id int [pk, increment]
+  name varchar(191) [not null]
+  description text [not null]
+  category varchar(191) [not null]
+  fileUrl varchar(191) [not null]
+}

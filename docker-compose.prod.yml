@@ -1,0 +1,66 @@
+# Ambiente de PRODUÇÃO (VPS com Docker + Cloudflare Tunnel).
+# Uso no servidor:
+#   cp .env.production.example .env   # e preencha os valores
+#   docker compose -f docker-compose.prod.yml pull
+#   docker compose -f docker-compose.prod.yml up -d
+# Nenhuma porta é publicada no host: o tráfego entra pelo túnel da Cloudflare (HTTPS, WAF, bots).
+services:
+  app:
+    image: ${APP_IMAGE:-ghcr.io/heloyse19/synergy:latest}
+    container_name: synergy-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: mysql://${MYSQL_USER:-synergy}:${MYSQL_PASSWORD:?defina MYSQL_PASSWORD no .env}@db:3306/${MYSQL_DATABASE:-synergy}
+      SESSION_SECRET: ${SESSION_SECRET:?defina SESSION_SECRET no .env}
+      APP_URL: ${APP_URL:?defina APP_URL no .env}
+      TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY:-}
+      TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
+      SHOW_DEMO_ACCOUNTS: ${SHOW_DEMO_ACCOUNTS:-false}
+    networks: [internal]
+    logging:
+      driver: json-file
+      options: { max-size: '10m', max-file: '3' }
+
+  db:
+    image: mysql:8.4
+    container_name: synergy-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?defina MYSQL_ROOT_PASSWORD no .env}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-synergy}
+      MYSQL_USER: ${MYSQL_USER:-synergy}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?defina MYSQL_PASSWORD no .env}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', '127.0.0.1', '-uroot', '-p${MYSQL_ROOT_PASSWORD}']
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    networks: [internal]
+
+  # Cloudflare Tunnel: conexão de saída até a Cloudflare; o hostname público aponta para http://app:3000.
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: synergy-tunnel
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:?defina CLOUDFLARE_TUNNEL_TOKEN no .env}
+    depends_on: [app]
+    networks: [internal]
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  db_data:

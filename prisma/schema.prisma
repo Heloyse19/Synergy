@@ -1,0 +1,282 @@
+// Modelo de dados do Synergy.
+// Convenção: identificadores em inglês no código; textos exibidos ao usuário em português (ver src/lib/labels.ts).
+// Após alterar este arquivo: npm run db:migrate -- --name descreva_a_mudanca
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+/// Perfil de acesso do usuário (RF: cadastro com perfis distintos).
+enum Role {
+  STARTUP
+  INVESTOR
+  PROFESSIONAL
+  ADMIN
+}
+
+/// Plano da conta. Recursos premium: comunidade, roadmap burocrático e templates.
+enum Plan {
+  FREE
+  PREMIUM
+}
+
+/// Estágio de maturidade da startup.
+enum StartupStage {
+  IDEA
+  VALIDATION
+  MVP
+  TRACTION
+  SCALE
+}
+
+enum EventType {
+  HACKATHON
+  MEETUP
+  PITCH_DAY
+  WORKSHOP
+  DEMO_DAY
+  OTHER
+}
+
+/// INTERNAL = organizado pela plataforma; EXTERNAL = divulgação de evento de terceiros.
+enum EventOrigin {
+  INTERNAL
+  EXTERNAL
+}
+
+enum JobType {
+  CLT
+  PJ
+  FREELANCE
+  INTERNSHIP
+}
+
+enum WorkMode {
+  REMOTE
+  HYBRID
+  ONSITE
+}
+
+// ---------------------------------------------------------------------------
+// Usuários e perfis
+// ---------------------------------------------------------------------------
+
+model User {
+  id              String    @id @default(cuid())
+  name            String
+  email           String    @unique
+  passwordHash    String
+  role            Role
+  plan            Plan      @default(FREE)
+  planActivatedAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  startup         StartupProfile?
+  investor        InvestorProfile?
+  professional    ProfessionalProfile?
+  attendances     EventAttendance[]
+  organizedEvents Event[]
+  forumPosts      ForumPost[]
+  forumReplies    ForumReply[]
+}
+
+/// Nicho de mercado usado para segmentar startups (fintech, healthtech, ...).
+model Niche {
+  id       Int              @id @default(autoincrement())
+  name     String           @unique
+  slug     String           @unique
+  startups StartupProfile[]
+}
+
+model StartupProfile {
+  id          String       @id @default(cuid())
+  userId      String       @unique
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  /// Frase curta que resume a startup (até 280 caracteres).
+  pitch       String?      @db.VarChar(280)
+  description String?      @db.Text
+  website     String?
+  city        String?
+  stage       StartupStage @default(IDEA)
+  nicheId     Int?
+  niche       Niche?       @relation(fields: [nicheId], references: [id], onDelete: SetNull)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  jobs            JobPosting[]
+  roadmapProgress RoadmapProgress[]
+
+  @@index([nicheId])
+}
+
+model InvestorProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company   String?
+  /// Tese de investimento: setores, estágios e tickets de interesse.
+  thesis    String?  @db.Text
+  ticketMin Int?
+  ticketMax Int?
+  linkedin  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProfessionalProfile {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  headline              String?
+  bio                   String?  @db.Text
+  /// Habilidades separadas por vírgula (ex.: "React, Node.js, SQL").
+  skills                String?
+  linkedin              String?
+  portfolio             String?
+  availableForFreelance Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Eventos
+// ---------------------------------------------------------------------------
+
+model Event {
+  id          String      @id @default(cuid())
+  title       String
+  description String      @db.Text
+  type        EventType
+  origin      EventOrigin @default(INTERNAL)
+  startsAt    DateTime
+  endsAt      DateTime?
+  location    String?
+  isOnline    Boolean     @default(false)
+  externalUrl String?
+  capacity    Int?
+  /// Até esta data a inscrição é exclusiva para contas Premium (sistema de prioridade).
+  priorityUntil DateTime?
+  organizerId String
+  organizer   User        @relation(fields: [organizerId], references: [id])
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  attendances EventAttendance[]
+
+  @@index([startsAt])
+}
+
+/// Inscrição/presença em evento. Para investidores, representa a presença confirmada publicamente.
+model EventAttendance {
+  id        String   @id @default(cuid())
+  eventId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([eventId, userId])
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Vagas
+// ---------------------------------------------------------------------------
+
+model JobPosting {
+  id          String         @id @default(cuid())
+  startupId   String
+  startup     StartupProfile @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  title       String
+  description String         @db.Text
+  type        JobType
+  workMode    WorkMode
+  location    String?
+  salaryRange String?
+  /// Habilidades desejadas separadas por vírgula.
+  skills      String?
+  isActive    Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([isActive, createdAt])
+  @@index([startupId])
+}
+
+// ---------------------------------------------------------------------------
+// Comunidade (Premium)
+// ---------------------------------------------------------------------------
+
+model ForumPost {
+  id        String       @id @default(cuid())
+  authorId  String
+  author    User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  title     String
+  content   String       @db.Text
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  replies   ForumReply[]
+
+  @@index([createdAt])
+}
+
+model ForumReply {
+  id        String    @id @default(cuid())
+  postId    String
+  post      ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content   String    @db.Text
+  createdAt DateTime  @default(now())
+
+  @@index([postId])
+}
+
+// ---------------------------------------------------------------------------
+// Roadmap burocrático e templates (Premium)
+// ---------------------------------------------------------------------------
+
+/// Passo do roadmap burocrático (CNPJ, contrato social, marca, etc.). Conteúdo vem do seed.
+model RoadmapStep {
+  id          Int               @id @default(autoincrement())
+  order       Int
+  phase       String
+  title       String
+  description String            @db.Text
+  resourceUrl String?
+  progress    RoadmapProgress[]
+
+  @@index([order])
+}
+
+/// Progresso de uma startup em um passo do roadmap.
+model RoadmapProgress {
+  id          String         @id @default(cuid())
+  startupId   String
+  startup     StartupProfile @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  stepId      Int
+  step        RoadmapStep    @relation(fields: [stepId], references: [id], onDelete: Cascade)
+  completedAt DateTime       @default(now())
+
+  @@unique([startupId, stepId])
+}
+
+/// Template de landing page para captação. O arquivo fica em /public/templates.
+model LandingPageTemplate {
+  id          Int    @id @default(autoincrement())
+  name        String
+  description String @db.Text
+  category    String
+  fileUrl     String
+}

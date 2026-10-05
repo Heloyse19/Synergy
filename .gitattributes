@@ -1,0 +1,7 @@
+# Normaliza quebras de linha (importante para quem usa Windows).
+* text=auto eol=lf
+*.sh text eol=lf
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff2 binary
