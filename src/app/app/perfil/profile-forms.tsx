@@ -9,6 +9,7 @@ import {
 } from '@/actions/profile';
 import type { StartupStage } from '@/generated/prisma/enums';
 import { initialActionState } from '@/lib/action-state';
+import { MAX_INTERESTS } from '@/lib/validations/shared';
 import { startupStageLabels, toOptions } from '@/lib/labels';
 import { Field } from '@/components/ui/field';
 import { FormMessage } from '@/components/ui/form-message';
@@ -135,12 +136,21 @@ export type InvestorFormValues = {
   ticketMin: number | null;
   ticketMax: number | null;
   linkedin: string | null;
+  interestNicheIds: number[];
 };
 
-export function InvestorProfileForm({ profile }: { profile: InvestorFormValues }) {
+export function InvestorProfileForm({
+  profile,
+  niches,
+}: {
+  profile: InvestorFormValues;
+  niches: Array<{ id: number; name: string }>;
+}) {
   const [state, action] = useActionState(updateInvestorProfile, initialActionState);
   const v = state.values ?? {};
   const e = state.fieldErrors ?? {};
+  const selectedIds =
+    v.interestNicheIds?.split(',').filter(Boolean) ?? profile.interestNicheIds.map(String);
   return (
     <form action={action} className="space-y-4" noValidate>
       <FormMessage state={state} />
@@ -177,6 +187,27 @@ export function InvestorProfileForm({ profile }: { profile: InvestorFormValues }
           placeholder="https://linkedin.com/in/..."
           defaultValue={v.linkedin ?? profile.linkedin ?? ''}
         />
+      </Field>
+      <Field
+        label="Categorias de interesse (opcional)"
+        htmlFor="interestNicheIds"
+        error={e.interestNicheIds}
+        hint={`Ctrl/clique para escolher várias (até ${MAX_INTERESTS})`}
+      >
+        <Select
+          id="interestNicheIds"
+          name="interestNicheIds"
+          size={4}
+          multiple
+          className="py-2"
+          defaultValue={selectedIds}
+        >
+          {niches.map((niche) => (
+            <option key={niche.id} value={niche.id}>
+              {niche.name}
+            </option>
+          ))}
+        </Select>
       </Field>
       <Field
         label="Tese de investimento"

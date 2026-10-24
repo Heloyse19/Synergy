@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { StartupStage } from '@/generated/prisma/enums';
-import { checkbox, optionalInt, optionalText, optionalUrl } from './shared';
+import { checkbox, optionalInt, optionalText, optionalUrl, positiveIntListSchema } from './shared';
 
 export const accountSchema = z.object({
   name: z
@@ -31,6 +31,7 @@ export const investorProfileSchema = z
     ticketMin: optionalInt,
     ticketMax: optionalInt,
     linkedin: optionalUrl,
+    interestNicheIds: positiveIntListSchema.optional(),
   })
   .superRefine((data, ctx) => {
     if (

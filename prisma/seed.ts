@@ -48,6 +48,21 @@ async function seedNiches() {
   console.log(`✔ ${niches.length} nichos`);
 }
 
+/** Define (substituindo) as categorias de interesse de um investidor, idempotente. */
+async function seedInvestorInterests(investorProfileId: string, nicheNames: string[]) {
+  const niches = await prisma.niche.findMany({
+    where: { name: { in: nicheNames } },
+    select: { id: true },
+  });
+  await prisma.investorInterest.deleteMany({ where: { investorId: investorProfileId } });
+  if (niches.length > 0) {
+    await prisma.investorInterest.createMany({
+      data: niches.map((niche) => ({ investorId: investorProfileId, nicheId: niche.id })),
+      skipDuplicates: true,
+    });
+  }
+}
+
 async function upsertUser(input: {
   email: string;
   name: string;
@@ -130,7 +145,7 @@ async function seedUsers() {
     password: DEMO_PASSWORD,
     role: 'INVESTOR',
   });
-  await prisma.investorProfile.upsert({
+  const investorProfile1 = await prisma.investorProfile.upsert({
     where: { userId: investor1.id },
     update: {},
     create: {
@@ -141,6 +156,7 @@ async function seedUsers() {
       ticketMax: 500_000,
     },
   });
+  await seedInvestorInterests(investorProfile1.id, ['Fintech', 'SaaS B2B', 'Healthtech']);
 
   const investor2 = await upsertUser({
     email: 'investidor2@demo.local',
@@ -148,7 +164,7 @@ async function seedUsers() {
     password: DEMO_PASSWORD,
     role: 'INVESTOR',
   });
-  await prisma.investorProfile.upsert({
+  const investorProfile2 = await prisma.investorProfile.upsert({
     where: { userId: investor2.id },
     update: {},
     create: {
@@ -159,6 +175,7 @@ async function seedUsers() {
       ticketMax: 300_000,
     },
   });
+  await seedInvestorInterests(investorProfile2.id, ['Agrotech', 'Climatech']);
 
   const professional = await upsertUser({
     email: 'profissional@demo.local',

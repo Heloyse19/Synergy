@@ -58,6 +58,12 @@ Table InvestorProfile {
   updatedAt datetime [not null]
 }
 
+Table InvestorInterest {
+  id varchar(191) [pk]
+  investorId varchar(191) [not null, ref: > InvestorProfile.id]
+  nicheId int [not null, ref: > Niche.id]
+}
+
 Table ProfessionalProfile {
   id varchar(191) [pk]
   userId varchar(191) [not null, unique, ref: - User.id]

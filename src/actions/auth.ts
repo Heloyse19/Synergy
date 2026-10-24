@@ -14,7 +14,11 @@ import { safeInternalPath } from '@/lib/utils';
 const REGISTER_FIELDS = ['name', 'email', 'role', 'startupName', 'nicheId', 'company', 'headline'];
 
 export async function register(_prev: ActionState, formData: FormData): Promise<ActionState> {
-  const values = formValues(formData, REGISTER_FIELDS);
+  // Interesses chegam como múltiplas chaves "interestNicheIds"; repopula como lista em vírgulas.
+  const values = {
+    ...formValues(formData, REGISTER_FIELDS),
+    interestNicheIds: formData.getAll('interestNicheIds').map(String).join(','),
+  };
   const ip = await getClientIp();
 
   if (!limiters.register.check(`register:${ip}`).allowed) {
@@ -37,6 +41,7 @@ export async function register(_prev: ActionState, formData: FormData): Promise<
     nicheId: formData.get('nicheId'),
     company: formData.get('company'),
     headline: formData.get('headline'),
+    interestNicheIds: formData.getAll('interestNicheIds'),
   });
   if (!parsed.success) return validationError(parsed.error, values);
 
@@ -55,14 +60,24 @@ export async function register(_prev: ActionState, formData: FormData): Promise<
     };
   }
 
-  // Garante que o nicho informado existe (evita erro de chave estrangeira).
+  // Garante que os nichos informados existem (evita erro de chave estrangeira).
   let nicheId: number | undefined;
+  let interestNicheIds: number[] = [];
+  const nicheRequest = data.role === 'INVESTOR' ? data.interestNicheIds : undefined;
   if (data.nicheId) {
     const niche = await prisma.niche.findUnique({
       where: { id: data.nicheId },
       select: { id: true },
     });
     nicheId = niche?.id;
+  }
+  if (nicheRequest && nicheRequest.length > 0) {
+    const niches = await prisma.niche.findMany({
+      where: { id: { in: nicheRequest } },
+      select: { id: true },
+    });
+    const validIds = new Set(niches.map((niche) => niche.id));
+    interestNicheIds = nicheRequest.filter((id) => validIds.has(id));
   }
 
   const passwordHash = await hashPassword(data.password);
@@ -77,7 +92,21 @@ export async function register(_prev: ActionState, formData: FormData): Promise<
         data.role === 'STARTUP'
           ? { create: { name: data.startupName as string, nicheId } }
           : undefined,
-      investor: data.role === 'INVESTOR' ? { create: { company: data.company } } : undefined,
+      investor:
+        data.role === 'INVESTOR'
+          ? {
+              create: {
+                company: data.company,
+                ...(interestNicheIds.length > 0
+                  ? {
+                      interests: {
+                        createMany: { data: interestNicheIds.map((nicheId) => ({ nicheId })) },
+                      },
+                    }
+                  : {}),
+              },
+            }
+          : undefined,
       professional:
         data.role === 'PROFESSIONAL' ? { create: { headline: data.headline } } : undefined,
     },

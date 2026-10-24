@@ -15,9 +15,18 @@ export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTex
   return <textarea className={cn(controlClasses, 'min-h-[120px] py-2', className)} {...props} />;
 }
 
-export function Select({ className, children, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
+export function Select({
+  className,
+  multiple,
+  children,
+  ...props
+}: SelectHTMLAttributes<HTMLSelectElement>) {
   return (
-    <select className={cn(controlClasses, 'h-10', className)} {...props}>
+    <select
+      className={cn(controlClasses, !multiple && 'h-10', multiple && 'h-auto', className)}
+      multiple={multiple}
+      {...props}
+    >
       {children}
     </select>
   );
