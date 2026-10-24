@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { emailSchema, optionalInt, optionalText } from './shared';
+import { emailSchema, optionalInt, optionalText, positiveIntListSchema } from './shared';
 
 /** Perfis que podem ser escolhidos no cadastro (ADMIN só via seed/banco). */
 export const registerRoles = ['STARTUP', 'INVESTOR', 'PROFESSIONAL'] as const;
@@ -24,6 +24,8 @@ export const registerSchema = z
     nicheId: optionalInt,
     company: optionalText(80),
     headline: optionalText(120),
+    // Categorias de interesse do investidor (select múltiplo)
+    interestNicheIds: positiveIntListSchema.optional(),
   })
   .superRefine((data, ctx) => {
     if (data.role === 'STARTUP' && !data.startupName) {

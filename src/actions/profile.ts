@@ -71,7 +71,14 @@ export async function updateStartupProfile(
   return successState('Perfil da startup atualizado.');
 }
 
-const INVESTOR_FIELDS = ['company', 'thesis', 'ticketMin', 'ticketMax', 'linkedin'];
+const INVESTOR_FIELDS = [
+  'company',
+  'thesis',
+  'ticketMin',
+  'ticketMax',
+  'linkedin',
+  'interestNicheIds',
+];
 
 export async function updateInvestorProfile(
   _prev: ActionState,
@@ -82,18 +89,40 @@ export async function updateInvestorProfile(
   if (!user.investor) return errorState('Esta conta não possui perfil de investidor.');
 
   const values = formValues(formData, INVESTOR_FIELDS);
-  const parsed = investorProfileSchema.safeParse(pick(formData, INVESTOR_FIELDS));
+  const parsed = investorProfileSchema.safeParse({
+    company: formData.get('company'),
+    thesis: formData.get('thesis'),
+    ticketMin: formData.get('ticketMin'),
+    ticketMax: formData.get('ticketMax'),
+    linkedin: formData.get('linkedin'),
+    interestNicheIds: formData.getAll('interestNicheIds'),
+  });
   if (!parsed.success) return validationError(parsed.error, values);
 
-  await prisma.investorProfile.update({
-    where: { id: user.investor.id },
-    data: {
-      company: parsed.data.company ?? null,
-      thesis: parsed.data.thesis ?? null,
-      ticketMin: parsed.data.ticketMin ?? null,
-      ticketMax: parsed.data.ticketMax ?? null,
-      linkedin: parsed.data.linkedin ?? null,
-    },
+  const { interestNicheIds = [] } = parsed.data;
+  const investorId = user.investor.id;
+  const data = {
+    company: parsed.data.company ?? null,
+    thesis: parsed.data.thesis ?? null,
+    ticketMin: parsed.data.ticketMin ?? null,
+    ticketMax: parsed.data.ticketMax ?? null,
+    linkedin: parsed.data.linkedin ?? null,
+  };
+
+  await prisma.$transaction(async (tx) => {
+    await tx.investorProfile.update({ where: { id: investorId }, data });
+    // Substitui a lista de interesses pelo que veio do formulário (só nichos válidos).
+    const niches = interestNicheIds.length
+      ? await tx.niche.findMany({ where: { id: { in: interestNicheIds } }, select: { id: true } })
+      : [];
+    const validIds = new Set(niches.map((niche) => niche.id));
+    await tx.investorInterest.deleteMany({ where: { investorId } });
+    if (validIds.size > 0) {
+      await tx.investorInterest.createMany({
+        data: [...validIds].map((nicheId) => ({ investorId, nicheId })),
+        skipDuplicates: true,
+      });
+    }
   });
 
   revalidatePath('/', 'layout');

@@ -36,6 +36,13 @@ export const checkbox = z.preprocess(
   z.boolean(),
 );
 
+/** Lista de ids numéricos positivos enviados por um <select multiple> ou checkboxes. */
+export const MAX_INTERESTS = 5;
+
+export const positiveIntListSchema = z
+  .array(z.int({ error: 'Valor inválido' }).positive('Valor inválido'))
+  .max(MAX_INTERESTS, `Escolha no máximo ${MAX_INTERESTS} categorias`);
+
 export const emailSchema = z
   .string({ error: 'Informe o e-mail' })
   .trim()

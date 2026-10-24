@@ -5,6 +5,7 @@ import { Briefcase, HandCoins, Rocket } from 'lucide-react';
 import { register } from '@/actions/auth';
 import { initialActionState } from '@/lib/action-state';
 import { roleDescriptions, roleLabels } from '@/lib/labels';
+import { MAX_INTERESTS } from '@/lib/validations/shared';
 import { registerRoles } from '@/lib/validations/auth';
 import { cn } from '@/lib/utils';
 import { TurnstileWidget } from '@/components/auth/turnstile-widget';
@@ -129,14 +130,37 @@ export function RegisterForm({ niches, turnstileSiteKey }: RegisterFormProps) {
       ) : null}
 
       {role === 'INVESTOR' ? (
-        <Field
-          label="Empresa ou fundo (opcional)"
-          htmlFor="company"
-          error={state.fieldErrors?.company}
-          hint="Aparece ao lado do seu nome quando você confirma presença em eventos."
-        >
-          <Input id="company" name="company" defaultValue={state.values?.company} />
-        </Field>
+        <>
+          <Field
+            label="Empresa ou fundo (opcional)"
+            htmlFor="company"
+            error={state.fieldErrors?.company}
+            hint="Aparece ao lado do seu nome quando você confirma presença em eventos."
+          >
+            <Input id="company" name="company" defaultValue={state.values?.company} />
+          </Field>
+          <Field
+            label="Categorias de interesse (opcional)"
+            htmlFor="interestNicheIds"
+            error={state.fieldErrors?.interestNicheIds}
+            hint={`Ctrl/clique para escolher várias (até ${MAX_INTERESTS}). Usamos para destacar startups para você.`}
+          >
+            <Select
+              id="interestNicheIds"
+              name="interestNicheIds"
+              size={4}
+              multiple
+              className="py-2"
+              defaultValue={state.values?.interestNicheIds?.split(',').filter(Boolean)}
+            >
+              {niches.map((niche) => (
+                <option key={niche.id} value={niche.id}>
+                  {niche.name}
+                </option>
+              ))}
+            </Select>
+          </Field>
+        </>
       ) : null}
 
       {role === 'PROFESSIONAL' ? (

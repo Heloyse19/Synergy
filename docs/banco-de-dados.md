@@ -10,6 +10,8 @@ versionada em `prisma/migrations`. O arquivo [`banco-de-dados.dbml`](banco-de-da
 erDiagram
   User ||--o| StartupProfile : "startup"
   User ||--o| InvestorProfile : "investor"
+  InvestorProfile ||--o{ InvestorInterest : "interesses"
+  Niche ||--o{ InvestorInterest : "interessados"
   User ||--o| ProfessionalProfile : "professional"
   Niche ||--o{ StartupProfile : "segmenta"
   User ||--o{ Event : "organiza"
@@ -73,6 +75,7 @@ erDiagram
 | `Niche`                    | Nichos de mercado (fintech, healthtech...). Carregados pelo seed; usados para segmentar startups             |
 | `StartupProfile`           | Dados da startup (1:1 com `User` de perfil STARTUP): nome, pitch, estágio, nicho, cidade, site               |
 | `InvestorProfile`          | Dados do investidor anjo: empresa/fundo, tese, faixa de ticket, LinkedIn                                     |
+| `InvestorInterest`         | Categorias de mercado que o investidor acompanha (únnica por investidor + nicho)                             |
 | `ProfessionalProfile`      | Dados do profissional: título, bio, habilidades, links, disponibilidade para freelance                       |
 | `Event`                    | Eventos internos ou externos: datas, local/online, capacidade, `priorityUntil` (janela Premium)              |
 | `EventAttendance`          | Inscrição/presença (única por evento + usuário). Para investidores, é a presença pública                     |

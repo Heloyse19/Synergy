@@ -13,16 +13,16 @@ Relação entre o documento de checkpoint do PI, o que o MVP entrega e o que fal
 
 ## Escopo definido
 
-| Item do escopo                                    | Status | Observações                                                                                |
-| ------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------ |
-| Cadastro e segmentação de startups por nicho      | ✅/🔜  | Nicho no cadastro e perfil. **Falta** um diretório público de startups filtrável por nicho |
-| Aba de eventos externos e internos                | ✅     | `origin` INTERNAL/EXTERNAL, link externo                                                   |
-| Sistema de prioridade de inscrição                | ✅     | `priorityUntil`: janela exclusiva Premium + capacidade                                     |
-| Confirmação de presença de investidores anjo      | ✅     | Lista pública no evento                                                                    |
-| Mural de vagas fixas e freelancer                 | ✅     | Tipos CLT/PJ/Freelancer/Estágio com filtros                                                |
-| Fórum de comunidade (Premium)                     | ✅     | Publicações e respostas; exclusão por autor/admin                                          |
-| Roadmap burocrático (Premium)                     | ✅     | 18 passos em 4 fases com progresso por startup                                             |
-| Templates de landing page para captação (Premium) | ✅     | 3 templates HTML em `public/templates`                                                     |
+| Item do escopo                                    | Status | Observações                                                                                                      |
+| ------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------- |
+| Cadastro e segmentação de startups por nicho      | ✅     | Nicho no cadastro e perfil; diretório em `/app/startups` com filtro por nicho/estágio e interesses do investidor |
+| Aba de eventos externos e internos                | ✅     | `origin` INTERNAL/EXTERNAL, link externo                                                                         |
+| Sistema de prioridade de inscrição                | ✅     | `priorityUntil`: janela exclusiva Premium + capacidade                                                           |
+| Confirmação de presença de investidores anjo      | ✅     | Lista pública no evento                                                                                          |
+| Mural de vagas fixas e freelancer                 | ✅     | Tipos CLT/PJ/Freelancer/Estágio com filtros                                                                      |
+| Fórum de comunidade (Premium)                     | ✅     | Publicações e respostas; exclusão por autor/admin                                                                |
+| Roadmap burocrático (Premium)                     | ✅     | 18 passos em 4 fases com progresso por startup                                                                   |
+| Templates de landing page para captação (Premium) | ✅     | 3 templates HTML em `public/templates`                                                                           |
 
 Fora do escopo (mantido): matching automático de startups similares; consultoria ao vivo.
 
@@ -41,9 +41,8 @@ Fora do escopo (mantido): matching automático de startups similares; consultori
 | --- | ------------------------------------------------------------------------------------------------------------------ | -------------------- |
 | 1   | **Pagamento do Premium** (Stripe, Mercado Pago ou Asaas) substituindo a ativação simulada; webhook atualiza `plan` | Back-end             |
 | 2   | **Candidatura a vagas**: tabela `JobApplication`, botão "Candidatar-se", lista de candidatos para a startup        | Back-end + Front-end |
-| 3   | **Diretório de startups** público com filtro por nicho e estágio (segmentação do escopo)                           | Front-end + Dados    |
-| 4   | **Recuperação de senha e confirmação de e-mail** (ex.: Resend) + troca de senha no perfil                          | Back-end             |
-| 5   | **Painel administrativo**: gerenciar usuários, eventos, moderar fórum e vagas                                      | Full stack           |
+| 3   | **Recuperação de senha e confirmação de e-mail** (ex.: Resend) + troca de senha no perfil                          | Back-end             |
+| 4   | **Painel administrativo**: gerenciar usuários, eventos, moderar fórum e vagas                                      | Full stack           |
 
 ### Média prioridade
 

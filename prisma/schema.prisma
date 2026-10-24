@@ -92,10 +92,11 @@ model User {
 
 /// Nicho de mercado usado para segmentar startups (fintech, healthtech, ...).
 model Niche {
-  id       Int              @id @default(autoincrement())
-  name     String           @unique
-  slug     String           @unique
-  startups StartupProfile[]
+  id        Int                @id @default(autoincrement())
+  name      String             @unique
+  slug      String             @unique
+  startups  StartupProfile[]
+  interests InvestorInterest[]
 }
 
 model StartupProfile {
@@ -130,8 +131,21 @@ model InvestorProfile {
   ticketMin Int?
   ticketMax Int?
   linkedin  String?
+  interests InvestorInterest[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+/// Categoria (nicho) de mercado que o investidor acompanha, para destacar e filtrar startups.
+model InvestorInterest {
+  id         String          @id @default(cuid())
+  investorId String
+  investor   InvestorProfile @relation(fields: [investorId], references: [id], onDelete: Cascade)
+  nicheId    Int
+  niche      Niche           @relation(fields: [nicheId], references: [id], onDelete: Cascade)
+
+  @@unique([investorId, nicheId])
+  @@index([investorId])
 }
 
 model ProfessionalProfile {

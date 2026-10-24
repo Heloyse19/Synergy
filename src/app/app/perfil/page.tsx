@@ -38,7 +38,14 @@ export default async function ProfilePage() {
     user.investor
       ? prisma.investorProfile.findUnique({
           where: { id: user.investor.id },
-          select: { company: true, thesis: true, ticketMin: true, ticketMax: true, linkedin: true },
+          select: {
+            company: true,
+            thesis: true,
+            ticketMin: true,
+            ticketMax: true,
+            linkedin: true,
+            interests: { select: { nicheId: true } },
+          },
         })
       : null,
     user.professional
@@ -54,7 +61,7 @@ export default async function ProfilePage() {
           },
         })
       : null,
-    user.startup ? listNiches() : Promise.resolve([]),
+    user.startup || user.investor ? listNiches() : Promise.resolve([]),
   ]);
 
   return (
@@ -105,7 +112,13 @@ export default async function ProfilePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <InvestorProfileForm profile={investor} />
+              <InvestorProfileForm
+                profile={{
+                  ...investor,
+                  interestNicheIds: investor.interests.map((interest) => interest.nicheId),
+                }}
+                niches={niches}
+              />
             </CardContent>
           </Card>
         ) : null}
