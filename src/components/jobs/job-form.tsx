@@ -34,13 +34,19 @@ export function JobForm({ action, jobId, job, submitLabel }: JobFormProps) {
   const e = state.fieldErrors ?? {};
 
   return (
-    <form action={formAction} className="space-y-5" noValidate>
+    <form
+      data-testid={jobId ? 'job-edit-form' : 'job-create-form'}
+      action={formAction}
+      className="space-y-5"
+      noValidate
+    >
       {jobId ? <input type="hidden" name="jobId" value={jobId} /> : null}
       <FormMessage state={state} />
 
       <Field label="Título da vaga" htmlFor="title" error={e.title} required>
         <Input
           id="title"
+          data-testid="job-title"
           name="title"
           defaultValue={v.title ?? job?.title}
           placeholder="Ex.: Desenvolvedor(a) Front-end React"
@@ -50,7 +56,12 @@ export function JobForm({ action, jobId, job, submitLabel }: JobFormProps) {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Tipo de contratação" htmlFor="type" error={e.type} required>
-          <Select id="type" name="type" defaultValue={v.type ?? job?.type ?? 'CLT'}>
+          <Select
+            data-testid="job-type"
+            id="type"
+            name="type"
+            defaultValue={v.type ?? job?.type ?? 'CLT'}
+          >
             {toOptions(jobTypeLabels).map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -60,6 +71,7 @@ export function JobForm({ action, jobId, job, submitLabel }: JobFormProps) {
         </Field>
         <Field label="Modelo de trabalho" htmlFor="workMode" error={e.workMode} required>
           <Select
+            data-testid="job-work-mode"
             id="workMode"
             name="workMode"
             defaultValue={v.workMode ?? job?.workMode ?? 'REMOTE'}
@@ -80,7 +92,12 @@ export function JobForm({ action, jobId, job, submitLabel }: JobFormProps) {
           error={e.location}
           hint="Cidade/UF ou deixe vazio se remoto."
         >
-          <Input id="location" name="location" defaultValue={v.location ?? job?.location ?? ''} />
+          <Input
+            data-testid="job-location"
+            id="location"
+            name="location"
+            defaultValue={v.location ?? job?.location ?? ''}
+          />
         </Field>
         <Field
           label="Faixa salarial"
@@ -89,6 +106,7 @@ export function JobForm({ action, jobId, job, submitLabel }: JobFormProps) {
           hint='Ex.: "R$ 4.000 – R$ 6.000" ou "A combinar".'
         >
           <Input
+            data-testid="job-salary-range"
             id="salaryRange"
             name="salaryRange"
             defaultValue={v.salaryRange ?? job?.salaryRange ?? ''}
@@ -102,7 +120,12 @@ export function JobForm({ action, jobId, job, submitLabel }: JobFormProps) {
         error={e.skills}
         hint="Separe por vírgula. Ex.: React, TypeScript, Figma"
       >
-        <Input id="skills" name="skills" defaultValue={v.skills ?? job?.skills ?? ''} />
+        <Input
+          data-testid="job-skills"
+          id="skills"
+          name="skills"
+          defaultValue={v.skills ?? job?.skills ?? ''}
+        />
       </Field>
 
       <Field
@@ -113,6 +136,7 @@ export function JobForm({ action, jobId, job, submitLabel }: JobFormProps) {
         required
       >
         <Textarea
+          data-testid="job-description"
           id="description"
           name="description"
           rows={10}
@@ -123,13 +147,16 @@ export function JobForm({ action, jobId, job, submitLabel }: JobFormProps) {
 
       <label className="flex items-center gap-2 text-sm text-slate-700">
         <Checkbox
+          data-testid="job-is-active"
           name="isActive"
           defaultChecked={v.isActive ? v.isActive === 'on' : (job?.isActive ?? true)}
         />
         Vaga ativa (visível no mural)
       </label>
 
-      <SubmitButton pendingText="Salvando...">{submitLabel}</SubmitButton>
+      <SubmitButton data-testid="job-submit" pendingText="Salvando...">
+        {submitLabel}
+      </SubmitButton>
     </form>
   );
 }

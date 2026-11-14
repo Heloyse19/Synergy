@@ -39,6 +39,7 @@ export default async function JobDetailPage({ params, searchParams }: Props) {
   return (
     <Container className="space-y-8 py-10">
       <Link
+        data-testid="job-details-back-link"
         href={user ? '/app/vagas' : '/vagas'}
         className="inline-flex items-center gap-1 text-sm text-slate-600 hover:text-slate-900"
       >
@@ -133,6 +134,7 @@ export default async function JobDetailPage({ params, searchParams }: Props) {
               {job.startup.website ? (
                 <a
                   href={job.startup.website}
+                  data-testid="job-startup-website"
                   target="_blank"
                   rel="noreferrer"
                   className={buttonVariants({
@@ -159,6 +161,7 @@ export default async function JobDetailPage({ params, searchParams }: Props) {
               </p>
               {!user ? (
                 <Link
+                  data-testid="job-login-cta"
                   href={`/login?next=/vagas/${job.id}`}
                   className={buttonVariants({ className: 'w-full' })}
                 >

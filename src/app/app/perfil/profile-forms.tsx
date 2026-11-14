@@ -18,19 +18,27 @@ import { SubmitButton } from '@/components/ui/submit-button';
 export function AccountForm({ name, email }: { name: string; email: string }) {
   const [state, action] = useActionState(updateAccount, initialActionState);
   return (
-    <form action={action} className="space-y-4" noValidate>
+    <form data-testid="account-profile-form" action={action} className="space-y-4" noValidate>
       <FormMessage state={state} />
       <Field label="Nome" htmlFor="name" error={state.fieldErrors?.name} required>
-        <Input id="name" name="name" defaultValue={state.values?.name ?? name} required />
+        <Input
+          data-testid="account-name"
+          id="name"
+          name="name"
+          defaultValue={state.values?.name ?? name}
+          required
+        />
       </Field>
       <Field
         label="E-mail"
         htmlFor="email"
         hint="A troca de e-mail e senha está no backlog do produto."
       >
-        <Input id="email" value={email} disabled readOnly />
+        <Input data-testid="account-email" id="email" value={email} disabled readOnly />
       </Field>
-      <SubmitButton pendingText="Salvando...">Salvar conta</SubmitButton>
+      <SubmitButton data-testid="account-submit" pendingText="Salvando...">
+        Salvar conta
+      </SubmitButton>
     </form>
   );
 }
@@ -56,14 +64,21 @@ export function StartupProfileForm({
   const v = state.values ?? {};
   const e = state.fieldErrors ?? {};
   return (
-    <form action={action} className="space-y-4" noValidate>
+    <form data-testid="startup-profile-form" action={action} className="space-y-4" noValidate>
       <FormMessage state={state} />
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Nome da startup" htmlFor="startup-name" error={e.name} required>
-          <Input id="startup-name" name="name" defaultValue={v.name ?? profile.name} required />
+          <Input
+            data-testid="startup-name"
+            id="startup-name"
+            name="name"
+            defaultValue={v.name ?? profile.name}
+            required
+          />
         </Field>
         <Field label="Nicho de mercado" htmlFor="nicheId" error={e.nicheId}>
           <Select
+            data-testid="startup-niche"
             id="nicheId"
             name="nicheId"
             defaultValue={v.nicheId ?? profile.nicheId?.toString() ?? ''}
@@ -77,7 +92,12 @@ export function StartupProfileForm({
           </Select>
         </Field>
         <Field label="Estágio" htmlFor="stage" error={e.stage} required>
-          <Select id="stage" name="stage" defaultValue={v.stage ?? profile.stage}>
+          <Select
+            data-testid="startup-stage"
+            id="stage"
+            name="stage"
+            defaultValue={v.stage ?? profile.stage}
+          >
             {toOptions(startupStageLabels).map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -87,6 +107,7 @@ export function StartupProfileForm({
         </Field>
         <Field label="Cidade" htmlFor="city" error={e.city}>
           <Input
+            data-testid="startup-city"
             id="city"
             name="city"
             defaultValue={v.city ?? profile.city ?? ''}
@@ -96,6 +117,7 @@ export function StartupProfileForm({
       </div>
       <Field label="Site" htmlFor="website" error={e.website}>
         <Input
+          data-testid="startup-website"
           id="website"
           name="website"
           type="url"
@@ -110,6 +132,7 @@ export function StartupProfileForm({
         hint="Até 280 caracteres. Aparece nas vagas e eventos."
       >
         <Input
+          data-testid="startup-pitch"
           id="pitch"
           name="pitch"
           maxLength={280}
@@ -118,13 +141,16 @@ export function StartupProfileForm({
       </Field>
       <Field label="Descrição" htmlFor="description" error={e.description}>
         <Textarea
+          data-testid="startup-description"
           id="description"
           name="description"
           rows={6}
           defaultValue={v.description ?? profile.description ?? ''}
         />
       </Field>
-      <SubmitButton pendingText="Salvando...">Salvar perfil da startup</SubmitButton>
+      <SubmitButton data-testid="startup-submit" pendingText="Salvando...">
+        Salvar perfil da startup
+      </SubmitButton>
     </form>
   );
 }
@@ -142,14 +168,20 @@ export function InvestorProfileForm({ profile }: { profile: InvestorFormValues }
   const v = state.values ?? {};
   const e = state.fieldErrors ?? {};
   return (
-    <form action={action} className="space-y-4" noValidate>
+    <form data-testid="investor-profile-form" action={action} className="space-y-4" noValidate>
       <FormMessage state={state} />
       <Field label="Empresa ou fundo" htmlFor="company" error={e.company}>
-        <Input id="company" name="company" defaultValue={v.company ?? profile.company ?? ''} />
+        <Input
+          data-testid="investor-company"
+          id="company"
+          name="company"
+          defaultValue={v.company ?? profile.company ?? ''}
+        />
       </Field>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Ticket mínimo (R$)" htmlFor="ticketMin" error={e.ticketMin}>
           <Input
+            data-testid="investor-ticket-min"
             id="ticketMin"
             name="ticketMin"
             type="number"
@@ -160,6 +192,7 @@ export function InvestorProfileForm({ profile }: { profile: InvestorFormValues }
         </Field>
         <Field label="Ticket máximo (R$)" htmlFor="ticketMax" error={e.ticketMax}>
           <Input
+            data-testid="investor-ticket-max"
             id="ticketMax"
             name="ticketMax"
             type="number"
@@ -171,6 +204,7 @@ export function InvestorProfileForm({ profile }: { profile: InvestorFormValues }
       </div>
       <Field label="LinkedIn" htmlFor="linkedin" error={e.linkedin}>
         <Input
+          data-testid="investor-linkedin"
           id="linkedin"
           name="linkedin"
           type="url"
@@ -185,13 +219,16 @@ export function InvestorProfileForm({ profile }: { profile: InvestorFormValues }
         hint="Setores, estágios e perfis de startup que interessam."
       >
         <Textarea
+          data-testid="investor-thesis"
           id="thesis"
           name="thesis"
           rows={5}
           defaultValue={v.thesis ?? profile.thesis ?? ''}
         />
       </Field>
-      <SubmitButton pendingText="Salvando...">Salvar perfil de investidor</SubmitButton>
+      <SubmitButton data-testid="investor-submit" pendingText="Salvando...">
+        Salvar perfil de investidor
+      </SubmitButton>
     </form>
   );
 }
@@ -210,10 +247,11 @@ export function ProfessionalProfileForm({ profile }: { profile: ProfessionalForm
   const v = state.values ?? {};
   const e = state.fieldErrors ?? {};
   return (
-    <form action={action} className="space-y-4" noValidate>
+    <form data-testid="professional-profile-form" action={action} className="space-y-4" noValidate>
       <FormMessage state={state} />
       <Field label="Título profissional" htmlFor="headline" error={e.headline}>
         <Input
+          data-testid="professional-headline"
           id="headline"
           name="headline"
           defaultValue={v.headline ?? profile.headline ?? ''}
@@ -226,11 +264,17 @@ export function ProfessionalProfileForm({ profile }: { profile: ProfessionalForm
         error={e.skills}
         hint="Separe por vírgula. Ex.: React, Node.js, SQL"
       >
-        <Input id="skills" name="skills" defaultValue={v.skills ?? profile.skills ?? ''} />
+        <Input
+          data-testid="professional-skills"
+          id="skills"
+          name="skills"
+          defaultValue={v.skills ?? profile.skills ?? ''}
+        />
       </Field>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="LinkedIn" htmlFor="linkedin" error={e.linkedin}>
           <Input
+            data-testid="professional-linkedin"
             id="linkedin"
             name="linkedin"
             type="url"
@@ -240,6 +284,7 @@ export function ProfessionalProfileForm({ profile }: { profile: ProfessionalForm
         </Field>
         <Field label="Portfólio / GitHub" htmlFor="portfolio" error={e.portfolio}>
           <Input
+            data-testid="professional-portfolio"
             id="portfolio"
             name="portfolio"
             type="url"
@@ -249,10 +294,17 @@ export function ProfessionalProfileForm({ profile }: { profile: ProfessionalForm
         </Field>
       </div>
       <Field label="Sobre você" htmlFor="bio" error={e.bio}>
-        <Textarea id="bio" name="bio" rows={5} defaultValue={v.bio ?? profile.bio ?? ''} />
+        <Textarea
+          data-testid="professional-bio"
+          id="bio"
+          name="bio"
+          rows={5}
+          defaultValue={v.bio ?? profile.bio ?? ''}
+        />
       </Field>
       <label className="flex items-center gap-2 text-sm text-slate-700">
         <Checkbox
+          data-testid="professional-freelance"
           name="availableForFreelance"
           defaultChecked={
             v.availableForFreelance
@@ -262,7 +314,9 @@ export function ProfessionalProfileForm({ profile }: { profile: ProfessionalForm
         />
         Disponível para projetos freelancer
       </label>
-      <SubmitButton pendingText="Salvando...">Salvar perfil profissional</SubmitButton>
+      <SubmitButton data-testid="professional-submit" pendingText="Salvando...">
+        Salvar perfil profissional
+      </SubmitButton>
     </form>
   );
 }

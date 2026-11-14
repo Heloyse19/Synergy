@@ -81,11 +81,19 @@ export default async function HomePage() {
               confirmados e organize a burocracia da sua startup com um roadmap guiado.
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link href="/cadastro" className={buttonVariants({ size: 'lg' })}>
+              <Link
+                data-testid="home-register-cta"
+                href="/cadastro"
+                className={buttonVariants({ size: 'lg' })}
+              >
                 Criar conta gratuita
                 <ArrowRight className="size-4" aria-hidden />
               </Link>
-              <Link href="/eventos" className={buttonVariants({ variant: 'outline', size: 'lg' })}>
+              <Link
+                data-testid="home-events-cta"
+                href="/eventos"
+                className={buttonVariants({ variant: 'outline', size: 'lg' })}
+              >
                 Ver eventos
               </Link>
             </div>
@@ -134,7 +142,12 @@ export default async function HomePage() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((feature) => (
-              <Link key={feature.href} href={feature.href} className="group">
+              <Link
+                data-testid={`home-feature-link-${feature.href.replaceAll('/', '-').replace(/^-|-$/g, '')}`}
+                key={feature.href}
+                href={feature.href}
+                className="group"
+              >
                 <Card className="h-full transition-colors group-hover:border-brand-300">
                   <CardContent className="space-y-3 p-6">
                     <feature.icon className="size-6 text-brand-600" aria-hidden />
@@ -156,7 +169,11 @@ export default async function HomePage() {
                   Investidores anjo sinalizam publicamente onde estarão.
                 </p>
               </div>
-              <Link href="/eventos" className={buttonVariants({ variant: 'ghost' })}>
+              <Link
+                data-testid="home-all-events-link"
+                href="/eventos"
+                className={buttonVariants({ variant: 'ghost' })}
+              >
                 Ver todos
                 <ArrowRight className="size-4" aria-hidden />
               </Link>
@@ -178,7 +195,11 @@ export default async function HomePage() {
                   Oportunidades fixas e freelancer publicadas pelas startups.
                 </p>
               </div>
-              <Link href="/vagas" className={buttonVariants({ variant: 'ghost' })}>
+              <Link
+                data-testid="home-jobs-board-link"
+                href="/vagas"
+                className={buttonVariants({ variant: 'ghost' })}
+              >
                 Ver mural
                 <ArrowRight className="size-4" aria-hidden />
               </Link>
@@ -207,6 +228,7 @@ export default async function HomePage() {
               </p>
             </div>
             <Link
+              data-testid="home-premium-cta"
               href="/app/premium"
               className={buttonVariants({ variant: 'premium', size: 'lg' })}
             >

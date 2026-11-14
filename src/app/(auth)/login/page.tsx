@@ -27,7 +27,11 @@ export default async function LoginPage({
         <LoginForm next={safeInternalPath(next)} turnstileSiteKey={turnstileSiteKey()} />
         <p className="text-center text-sm text-slate-600">
           Ainda não tem conta?{' '}
-          <Link href="/cadastro" className="font-medium text-brand-600 hover:underline">
+          <Link
+            data-testid="login-register-link"
+            href="/cadastro"
+            className="font-medium text-brand-600 hover:underline"
+          >
             Criar conta gratuita
           </Link>
         </p>

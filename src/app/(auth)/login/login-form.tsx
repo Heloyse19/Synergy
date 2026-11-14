@@ -19,13 +19,14 @@ export function LoginForm({
   const [state, action] = useActionState(login, initialActionState);
 
   return (
-    <form action={action} className="space-y-4" noValidate>
+    <form data-testid="login-form" action={action} className="space-y-4" noValidate>
       <input type="hidden" name="next" value={next} />
       <FormMessage state={state} />
 
       <Field label="E-mail" htmlFor="email" error={state.fieldErrors?.email} required>
         <Input
           id="email"
+          data-testid="login-email"
           name="email"
           type="email"
           autoComplete="email"
@@ -39,6 +40,7 @@ export function LoginForm({
       <Field label="Senha" htmlFor="password" error={state.fieldErrors?.password} required>
         <Input
           id="password"
+          data-testid="login-password"
           name="password"
           type="password"
           autoComplete="current-password"
@@ -49,7 +51,7 @@ export function LoginForm({
 
       <TurnstileWidget siteKey={turnstileSiteKey} resetKey={state} />
 
-      <SubmitButton className="w-full" pendingText="Entrando...">
+      <SubmitButton data-testid="login-submit" className="w-full" pendingText="Entrando...">
         Entrar
       </SubmitButton>
     </form>

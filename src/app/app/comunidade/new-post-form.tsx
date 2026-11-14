@@ -17,7 +17,7 @@ export function NewPostForm() {
 
   if (!open && state.status !== 'error') {
     return (
-      <Button onClick={() => setOpen(true)}>
+      <Button data-testid="new-post-open" onClick={() => setOpen(true)}>
         <Plus className="size-4" aria-hidden />
         Nova publicação
       </Button>
@@ -27,10 +27,11 @@ export function NewPostForm() {
   return (
     <Card>
       <CardContent className="p-6">
-        <form action={action} className="space-y-4" noValidate>
+        <form data-testid="new-post-form" action={action} className="space-y-4" noValidate>
           <FormMessage state={state} />
           <Field label="Título" htmlFor="title" error={state.fieldErrors?.title} required>
             <Input
+              data-testid="new-post-title"
               id="title"
               name="title"
               defaultValue={state.values?.title}
@@ -40,6 +41,7 @@ export function NewPostForm() {
           </Field>
           <Field label="Conteúdo" htmlFor="content" error={state.fieldErrors?.content} required>
             <Textarea
+              data-testid="new-post-content"
               id="content"
               name="content"
               rows={6}
@@ -48,8 +50,10 @@ export function NewPostForm() {
             />
           </Field>
           <div className="flex gap-2">
-            <SubmitButton pendingText="Publicando...">Publicar</SubmitButton>
-            <Button variant="ghost" onClick={() => setOpen(false)}>
+            <SubmitButton data-testid="new-post-submit" pendingText="Publicando...">
+              Publicar
+            </SubmitButton>
+            <Button data-testid="new-post-cancel" variant="ghost" onClick={() => setOpen(false)}>
               Cancelar
             </Button>
           </div>

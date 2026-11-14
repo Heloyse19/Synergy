@@ -60,6 +60,7 @@ export default async function EventDetailPage({ params }: Props) {
   return (
     <Container className="space-y-8 py-10">
       <Link
+        data-testid="event-back-link"
         href={user ? '/app/eventos' : '/eventos'}
         className="inline-flex items-center gap-1 text-sm text-slate-600 hover:text-slate-900"
       >
@@ -124,7 +125,11 @@ export default async function EventDetailPage({ params }: Props) {
           <div className="prose-plain text-slate-700">{event.description}</div>
 
           {user?.role === 'ADMIN' ? (
-            <form action={deleteEvent} className="border-t border-slate-200 pt-4">
+            <form
+              data-testid="event-delete-form"
+              action={deleteEvent}
+              className="border-t border-slate-200 pt-4"
+            >
               <input type="hidden" name="eventId" value={event.id} />
               <SubmitButton variant="danger" size="sm" pendingText="Excluindo...">
                 <Trash2 className="size-4" aria-hidden />
@@ -155,6 +160,7 @@ export default async function EventDetailPage({ params }: Props) {
               ) : (
                 <div className="space-y-3">
                   <Link
+                    data-testid="event-external-link"
                     href={`/login?next=/eventos/${event.id}`}
                     className={buttonVariants({ className: 'w-full' })}
                   >
@@ -168,7 +174,11 @@ export default async function EventDetailPage({ params }: Props) {
               )}
               {priorityOpen && user && !attending && disabledReason ? (
                 <Alert variant="warning" className="mt-3">
-                  <Link href="/app/premium" className="font-medium underline">
+                  <Link
+                    data-testid="event-premium-link"
+                    href="/app/premium"
+                    className="font-medium underline"
+                  >
                     Ative o Premium
                   </Link>{' '}
                   para se inscrever durante a janela de prioridade.

@@ -11,14 +11,15 @@ export function JobManageActions({ jobId, isActive }: { jobId: string; isActive:
     <>
       <Link
         href={`/app/vagas/${jobId}/editar`}
+        data-testid={`job-edit-link-${jobId}`}
         className={buttonVariants({ variant: 'outline', size: 'sm' })}
       >
         <Pencil className="size-4" aria-hidden />
         Editar
       </Link>
-      <form action={toggleJobActive}>
+      <form data-testid={`job-toggle-form-${jobId}`} action={toggleJobActive}>
         <input type="hidden" name="jobId" value={jobId} />
-        <Button type="submit" variant="ghost" size="sm">
+        <Button data-testid={`job-toggle-button-${jobId}`} type="submit" variant="ghost" size="sm">
           {isActive ? (
             <EyeOff className="size-4" aria-hidden />
           ) : (
@@ -28,6 +29,7 @@ export function JobManageActions({ jobId, isActive }: { jobId: string; isActive:
         </Button>
       </form>
       <form
+        data-testid={`job-delete-form-${jobId}`}
         action={deleteJob}
         onSubmit={(event) => {
           if (!window.confirm('Excluir esta vaga? Esta ação não pode ser desfeita.'))
@@ -35,7 +37,13 @@ export function JobManageActions({ jobId, isActive }: { jobId: string; isActive:
         }}
       >
         <input type="hidden" name="jobId" value={jobId} />
-        <Button type="submit" variant="ghost" size="sm" className="text-red-600 hover:bg-red-50">
+        <Button
+          data-testid={`job-delete-button-${jobId}`}
+          type="submit"
+          variant="ghost"
+          size="sm"
+          className="text-red-600 hover:bg-red-50"
+        >
           <Trash2 className="size-4" aria-hidden />
           Excluir
         </Button>

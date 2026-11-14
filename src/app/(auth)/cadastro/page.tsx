@@ -23,7 +23,11 @@ export default async function RegisterPage() {
         <RegisterForm niches={niches} turnstileSiteKey={turnstileSiteKey()} />
         <p className="text-center text-sm text-slate-600">
           Já tem conta?{' '}
-          <Link href="/login" className="font-medium text-brand-600 hover:underline">
+          <Link
+            data-testid="register-login-link"
+            href="/login"
+            className="font-medium text-brand-600 hover:underline"
+          >
             Entrar
           </Link>
         </p>

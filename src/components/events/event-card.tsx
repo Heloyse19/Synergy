@@ -12,7 +12,10 @@ export function EventCard({ event }: { event: EventListItem }) {
   const priorityOpen = isPriorityWindowOpen(event.priorityUntil);
 
   return (
-    <Card className="flex h-full flex-col transition-shadow hover:shadow-md">
+    <Card
+      data-testid={`event-card-${event.id}`}
+      className="flex h-full flex-col transition-shadow hover:shadow-md"
+    >
       <CardContent className="flex flex-1 flex-col gap-3 p-5">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="brand">{eventTypeLabels[event.type]}</Badge>
@@ -29,7 +32,11 @@ export function EventCard({ event }: { event: EventListItem }) {
         </div>
 
         <h3 className="text-lg font-semibold leading-snug text-slate-900">
-          <Link href={`/eventos/${event.id}`} className="hover:text-brand-700">
+          <Link
+            data-testid={`event-details-link-${event.id}`}
+            href={`/eventos/${event.id}`}
+            className="hover:text-brand-700"
+          >
             {event.title}
           </Link>
         </h3>
