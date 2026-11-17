@@ -58,11 +58,15 @@ export default async function CommunityPage({
         <ul className="space-y-3">
           {posts.map((post) => (
             <li key={post.id}>
-              <Card className="transition-colors hover:border-brand-300">
+              <Card
+                data-testid={`community-post-card-${post.id}`}
+                className="transition-colors hover:border-brand-300"
+              >
                 <CardContent className="flex gap-4 p-5">
                   <Avatar name={post.author.name} />
                   <div className="min-w-0 flex-1 space-y-1">
                     <Link
+                      data-testid={`community-post-link-${post.id}`}
                       href={`/app/comunidade/${post.id}`}
                       className="block text-lg font-semibold text-slate-900 hover:text-brand-700"
                     >

@@ -21,11 +21,17 @@ export async function EventsList({ filter, basePath }: { filter: EventFilter; ba
 
   return (
     <div className="space-y-6">
-      <div className="flex gap-2" role="tablist" aria-label="Filtrar eventos">
+      <div
+        data-testid="events-filter-tabs"
+        className="flex gap-2"
+        role="tablist"
+        aria-label="Filtrar eventos"
+      >
         {filters.map((item) => (
           <Link
             key={item.value}
             href={item.value === 'upcoming' ? basePath : `${basePath}?filtro=${item.value}`}
+            data-testid={`events-filter-${item.value}`}
             role="tab"
             aria-selected={filter === item.value}
             className={cn(

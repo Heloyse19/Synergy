@@ -29,7 +29,7 @@ export function RegisterForm({ niches, turnstileSiteKey }: RegisterFormProps) {
   );
 
   return (
-    <form action={action} className="space-y-5" noValidate>
+    <form data-testid="register-form" action={action} className="space-y-5" noValidate>
       <FormMessage state={state} />
 
       <fieldset className="space-y-2">
@@ -49,6 +49,7 @@ export function RegisterForm({ niches, turnstileSiteKey }: RegisterFormProps) {
                 )}
               >
                 <input
+                  data-testid={`register-role-${value.toLowerCase()}`}
                   type="radio"
                   name="role"
                   value={value}
@@ -76,6 +77,7 @@ export function RegisterForm({ niches, turnstileSiteKey }: RegisterFormProps) {
       <Field label="Seu nome" htmlFor="name" error={state.fieldErrors?.name} required>
         <Input
           id="name"
+          data-testid="register-name"
           name="name"
           autoComplete="name"
           defaultValue={state.values?.name}
@@ -86,6 +88,7 @@ export function RegisterForm({ niches, turnstileSiteKey }: RegisterFormProps) {
       <Field label="E-mail" htmlFor="email" error={state.fieldErrors?.email} required>
         <Input
           id="email"
+          data-testid="register-email"
           name="email"
           type="email"
           autoComplete="email"
@@ -102,7 +105,14 @@ export function RegisterForm({ niches, turnstileSiteKey }: RegisterFormProps) {
         hint="Mínimo de 8 caracteres."
         required
       >
-        <Input id="password" name="password" type="password" autoComplete="new-password" required />
+        <Input
+          data-testid="register-password"
+          id="password"
+          name="password"
+          type="password"
+          autoComplete="new-password"
+          required
+        />
       </Field>
 
       {role === 'STARTUP' ? (
@@ -113,10 +123,20 @@ export function RegisterForm({ niches, turnstileSiteKey }: RegisterFormProps) {
             error={state.fieldErrors?.startupName}
             required
           >
-            <Input id="startupName" name="startupName" defaultValue={state.values?.startupName} />
+            <Input
+              data-testid="register-startup-name"
+              id="startupName"
+              name="startupName"
+              defaultValue={state.values?.startupName}
+            />
           </Field>
           <Field label="Nicho de mercado" htmlFor="nicheId" error={state.fieldErrors?.nicheId}>
-            <Select id="nicheId" name="nicheId" defaultValue={state.values?.nicheId ?? ''}>
+            <Select
+              data-testid="register-niche"
+              id="nicheId"
+              name="nicheId"
+              defaultValue={state.values?.nicheId ?? ''}
+            >
               <option value="">Selecione...</option>
               {niches.map((niche) => (
                 <option key={niche.id} value={niche.id}>
@@ -135,7 +155,12 @@ export function RegisterForm({ niches, turnstileSiteKey }: RegisterFormProps) {
           error={state.fieldErrors?.company}
           hint="Aparece ao lado do seu nome quando você confirma presença em eventos."
         >
-          <Input id="company" name="company" defaultValue={state.values?.company} />
+          <Input
+            data-testid="register-investor-company"
+            id="company"
+            name="company"
+            defaultValue={state.values?.company}
+          />
         </Field>
       ) : null}
 
@@ -146,13 +171,18 @@ export function RegisterForm({ niches, turnstileSiteKey }: RegisterFormProps) {
           error={state.fieldErrors?.headline}
           hint='Ex.: "Desenvolvedora full stack" ou "Designer de produto".'
         >
-          <Input id="headline" name="headline" defaultValue={state.values?.headline} />
+          <Input
+            data-testid="register-professional-headline"
+            id="headline"
+            name="headline"
+            defaultValue={state.values?.headline}
+          />
         </Field>
       ) : null}
 
       <TurnstileWidget siteKey={turnstileSiteKey} resetKey={state} />
 
-      <SubmitButton className="w-full" pendingText="Criando conta...">
+      <SubmitButton data-testid="register-submit" className="w-full" pendingText="Criando conta...">
         Criar conta gratuita
       </SubmitButton>
     </form>

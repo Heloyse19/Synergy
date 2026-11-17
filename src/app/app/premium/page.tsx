@@ -119,8 +119,9 @@ export default async function PremiumPage({
                 <p className="text-3xl font-bold">
                   R$ 49<span className="text-base font-normal text-slate-300">/mês</span>
                 </p>
-                <form action={activatePremium}>
+                <form data-testid="premium-activate-form" action={activatePremium}>
                   <SubmitButton
+                    data-testid="premium-activate-submit"
                     variant="premium"
                     size="lg"
                     className="w-full"
@@ -141,6 +142,7 @@ export default async function PremiumPage({
                     <li key={feature.href}>
                       <Link
                         href={feature.href}
+                        data-testid={`premium-feature-link-${feature.href.replaceAll('/', '-').replace(/^-|-$/g, '')}`}
                         className="flex items-center justify-between rounded-lg border border-amber-200 bg-white px-3 py-2 hover:border-amber-400"
                       >
                         <span className="font-medium text-slate-800">{feature.title}</span>
@@ -150,8 +152,9 @@ export default async function PremiumPage({
                   ))}
                 </ul>
                 {user.role !== 'ADMIN' ? (
-                  <form action={cancelPremium}>
+                  <form data-testid="premium-cancel-form" action={cancelPremium}>
                     <SubmitButton
+                      data-testid="premium-cancel-submit"
                       variant="ghost"
                       size="sm"
                       className="w-full"

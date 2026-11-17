@@ -11,7 +11,11 @@ export function AppNav({ items }: { items: AppNavItem[] }) {
   const pathname = usePathname();
 
   return (
-    <nav className="-mb-px flex gap-1 overflow-x-auto" aria-label="Seções do painel">
+    <nav
+      data-testid="app-navigation"
+      className="-mb-px flex gap-1 overflow-x-auto"
+      aria-label="Seções do painel"
+    >
       {items.map((item) => {
         const active = item.exact
           ? pathname === item.href
@@ -20,6 +24,7 @@ export function AppNav({ items }: { items: AppNavItem[] }) {
           <Link
             key={item.href}
             href={item.href}
+            data-testid={`app-nav-link-${item.label.toLowerCase()}`}
             aria-current={active ? 'page' : undefined}
             className={cn(
               'whitespace-nowrap border-b-2 px-3 py-3 text-sm font-medium transition-colors',

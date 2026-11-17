@@ -33,6 +33,7 @@ export default async function CommunityPostPage({ params }: Props) {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <Link
+        data-testid="community-back-link"
         href="/app/comunidade"
         className="inline-flex items-center gap-1 text-sm text-slate-600 hover:text-slate-900"
       >
@@ -57,7 +58,11 @@ export default async function CommunityPostPage({ params }: Props) {
           </div>
           <div className="prose-plain text-slate-700">{post.content}</div>
           {canDeletePost ? (
-            <form action={deleteForumPost} className="border-t border-slate-100 pt-3">
+            <form
+              data-testid="community-post-delete-form"
+              action={deleteForumPost}
+              className="border-t border-slate-100 pt-3"
+            >
               <input type="hidden" name="postId" value={post.id} />
               <SubmitButton
                 variant="ghost"
@@ -93,10 +98,14 @@ export default async function CommunityPostPage({ params }: Props) {
                   </p>
                   <div className="prose-plain text-sm text-slate-700">{reply.content}</div>
                   {canDelete ? (
-                    <form action={deleteForumReply}>
+                    <form
+                      data-testid={`community-reply-delete-form-${reply.id}`}
+                      action={deleteForumReply}
+                    >
                       <input type="hidden" name="replyId" value={reply.id} />
                       <input type="hidden" name="postId" value={post.id} />
                       <Button
+                        data-testid={`community-reply-delete-button-${reply.id}`}
                         type="submit"
                         variant="ghost"
                         size="sm"

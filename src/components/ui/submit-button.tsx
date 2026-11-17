@@ -11,6 +11,7 @@ type SubmitButtonProps = {
   size?: ButtonSize;
   className?: string;
   disabled?: boolean;
+  'data-testid'?: string;
 };
 
 /** Botão de envio que mostra estado de carregamento enquanto a Server Action roda. */
@@ -21,11 +22,13 @@ export function SubmitButton({
   size,
   className,
   disabled,
+  'data-testid': dataTestId,
 }: SubmitButtonProps) {
   const { pending } = useFormStatus();
   return (
     <Button
       type="submit"
+      data-testid={dataTestId}
       variant={variant}
       size={size}
       className={className}

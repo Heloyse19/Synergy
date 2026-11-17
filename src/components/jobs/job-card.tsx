@@ -12,7 +12,7 @@ export function JobCard({ job, actions }: { job: JobListItem; actions?: ReactNod
   const skills = splitList(job.skills);
 
   return (
-    <Card className="transition-shadow hover:shadow-md">
+    <Card data-testid={`job-card-${job.id}`} className="transition-shadow hover:shadow-md">
       <CardContent className="flex flex-col gap-3 p-5">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
@@ -27,7 +27,11 @@ export function JobCard({ job, actions }: { job: JobListItem; actions?: ReactNod
 
         <div>
           <h3 className="text-lg font-semibold leading-snug text-slate-900">
-            <Link href={`/vagas/${job.id}`} className="hover:text-brand-700">
+            <Link
+              data-testid={`job-details-link-${job.id}`}
+              href={`/vagas/${job.id}`}
+              className="hover:text-brand-700"
+            >
               {job.title}
             </Link>
           </h3>

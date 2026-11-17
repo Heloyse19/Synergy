@@ -49,7 +49,7 @@ export default async function RoadmapPage() {
         </Alert>
       ) : null}
 
-      <Card>
+      <Card data-testid="roadmap-progress">
         <CardContent className="space-y-3 p-6">
           <div className="flex items-center justify-between text-sm">
             <span className="font-medium text-slate-900">Progresso geral</span>
@@ -96,9 +96,13 @@ export default async function RoadmapPage() {
                       return (
                         <li key={step.id} className="flex gap-3 py-3">
                           {user.startup ? (
-                            <form action={toggleRoadmapStep}>
+                            <form
+                              data-testid={`roadmap-step-form-${step.id}`}
+                              action={toggleRoadmapStep}
+                            >
                               <input type="hidden" name="stepId" value={step.id} />
                               <button
+                                data-testid={`roadmap-step-toggle-${step.id}`}
                                 type="submit"
                                 className="mt-0.5 rounded-full text-slate-400 hover:text-emerald-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600"
                                 aria-pressed={isDone}
@@ -129,6 +133,7 @@ export default async function RoadmapPage() {
                             {step.resourceUrl ? (
                               <a
                                 href={step.resourceUrl}
+                                data-testid={`roadmap-resource-link-${step.id}`}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-brand-700 hover:underline"

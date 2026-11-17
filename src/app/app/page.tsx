@@ -103,7 +103,11 @@ export default async function DashboardPage({
       {params['bem-vindo'] ? (
         <Alert variant="success" title="Conta criada com sucesso!">
           Complete seu perfil para aparecer melhor para a comunidade.{' '}
-          <Link href="/app/perfil" className="font-medium underline">
+          <Link
+            data-testid="dashboard-profile-completion-link"
+            href="/app/perfil"
+            className="font-medium underline"
+          >
             Editar perfil
           </Link>
         </Alert>
@@ -114,7 +118,12 @@ export default async function DashboardPage({
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {sections.map((section) => (
-          <Link key={section.href} href={section.href} className="group">
+          <Link
+            data-testid={`dashboard-section-link-${section.href.replaceAll('/', '-').replace(/^-|-$/g, '')}`}
+            key={section.href}
+            href={section.href}
+            className="group"
+          >
             <Card className="h-full transition-colors group-hover:border-brand-300">
               <CardContent className="flex h-full flex-col gap-3 p-5">
                 <div className="flex items-center justify-between">
@@ -140,7 +149,11 @@ export default async function DashboardPage({
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold text-slate-900">Próximos eventos</h2>
-            <Link href="/app/eventos" className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
+            <Link
+              data-testid="dashboard-events-link"
+              href="/app/eventos"
+              className={buttonVariants({ variant: 'ghost', size: 'sm' })}
+            >
               Ver todos
             </Link>
           </div>
@@ -158,7 +171,11 @@ export default async function DashboardPage({
             <>
               <div className="flex items-center justify-between pt-4">
                 <h2 className="text-lg font-semibold text-slate-900">Vagas recentes</h2>
-                <Link href="/vagas" className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
+                <Link
+                  data-testid="dashboard-jobs-link"
+                  href="/vagas"
+                  className={buttonVariants({ variant: 'ghost', size: 'sm' })}
+                >
                   Ver mural
                 </Link>
               </div>
@@ -182,11 +199,16 @@ export default async function DashboardPage({
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col gap-2">
-                <Link href="/app/vagas/nova" className={buttonVariants({ size: 'sm' })}>
+                <Link
+                  data-testid="dashboard-create-job-link"
+                  href="/app/vagas/nova"
+                  className={buttonVariants({ size: 'sm' })}
+                >
                   <Plus className="size-4" aria-hidden />
                   Publicar vaga
                 </Link>
                 <Link
+                  data-testid="dashboard-manage-jobs-link"
                   href="/app/vagas"
                   className={buttonVariants({ variant: 'outline', size: 'sm' })}
                 >
@@ -205,7 +227,11 @@ export default async function DashboardPage({
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Link href="/app/eventos/novo" className={buttonVariants({ size: 'sm' })}>
+                <Link
+                  data-testid="dashboard-create-event-link"
+                  href="/app/eventos/novo"
+                  className={buttonVariants({ size: 'sm' })}
+                >
                   <Plus className="size-4" aria-hidden />
                   Novo evento
                 </Link>
@@ -230,6 +256,7 @@ export default async function DashboardPage({
                   {myEvents.map(({ event }) => (
                     <li key={event.id} className="text-sm">
                       <Link
+                        data-testid={`dashboard-event-link-${event.id}`}
                         href={`/eventos/${event.id}`}
                         className="font-medium text-slate-900 hover:text-brand-700"
                       >
@@ -258,6 +285,7 @@ export default async function DashboardPage({
             </CardHeader>
             <CardContent className="flex flex-col gap-2 text-sm">
               <Link
+                data-testid="dashboard-roadmap-link"
                 href="/app/roadmap"
                 className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 hover:border-brand-300"
               >
@@ -266,6 +294,7 @@ export default async function DashboardPage({
                 {!premium ? <Lock className="ml-auto size-3.5 text-amber-500" aria-hidden /> : null}
               </Link>
               <Link
+                data-testid="dashboard-templates-link"
                 href="/app/templates"
                 className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 hover:border-brand-300"
               >

@@ -40,6 +40,7 @@ export async function JobsBoard({
   return (
     <div className="space-y-6">
       <form
+        data-testid="jobs-filters-form"
         method="get"
         action={basePath}
         className="grid gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-[1fr_180px_180px_auto]"
@@ -49,11 +50,17 @@ export async function JobsBoard({
         </label>
         <Input
           id="q"
+          data-testid="jobs-search"
           name="q"
           placeholder="Buscar por cargo, habilidade ou startup"
           defaultValue={filters.q ?? ''}
         />
-        <Select name="tipo" defaultValue={filters.type ?? ''} aria-label="Tipo de contratação">
+        <Select
+          data-testid="jobs-type-filter"
+          name="tipo"
+          defaultValue={filters.type ?? ''}
+          aria-label="Tipo de contratação"
+        >
           <option value="">Todos os tipos</option>
           {toOptions(jobTypeLabels).map((option) => (
             <option key={option.value} value={option.value}>
@@ -61,7 +68,12 @@ export async function JobsBoard({
             </option>
           ))}
         </Select>
-        <Select name="modelo" defaultValue={filters.workMode ?? ''} aria-label="Modelo de trabalho">
+        <Select
+          data-testid="jobs-work-mode-filter"
+          name="modelo"
+          defaultValue={filters.workMode ?? ''}
+          aria-label="Modelo de trabalho"
+        >
           <option value="">Todos os modelos</option>
           {toOptions(workModeLabels).map((option) => (
             <option key={option.value} value={option.value}>
@@ -70,12 +82,16 @@ export async function JobsBoard({
           ))}
         </Select>
         <div className="flex gap-2">
-          <Button type="submit" className="flex-1">
+          <Button data-testid="jobs-filter-submit" type="submit" className="flex-1">
             <Search className="size-4" aria-hidden />
             Filtrar
           </Button>
           {hasFilters ? (
-            <Link href={basePath} className={buttonVariants({ variant: 'ghost' })}>
+            <Link
+              data-testid="jobs-clear-filters"
+              href={basePath}
+              className={buttonVariants({ variant: 'ghost' })}
+            >
               Limpar
             </Link>
           ) : null}

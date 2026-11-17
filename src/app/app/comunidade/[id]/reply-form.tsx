@@ -17,11 +17,12 @@ export function ReplyForm({ postId }: { postId: string }) {
   }, [state]);
 
   return (
-    <form ref={formRef} action={action} className="space-y-3" noValidate>
+    <form data-testid="reply-form" ref={formRef} action={action} className="space-y-3" noValidate>
       <input type="hidden" name="postId" value={postId} />
       <FormMessage state={state} />
       <Field label="Sua resposta" htmlFor="content" error={state.fieldErrors?.content}>
         <Textarea
+          data-testid="reply-content"
           id="content"
           name="content"
           rows={4}
@@ -29,7 +30,9 @@ export function ReplyForm({ postId }: { postId: string }) {
           required
         />
       </Field>
-      <SubmitButton pendingText="Enviando...">Responder</SubmitButton>
+      <SubmitButton data-testid="reply-submit" pendingText="Enviando...">
+        Responder
+      </SubmitButton>
     </form>
   );
 }

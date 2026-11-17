@@ -15,16 +15,21 @@ export function EventForm() {
   const e = state.fieldErrors ?? {};
 
   return (
-    <form action={action} className="space-y-5" noValidate>
+    <form data-testid="event-create-form" action={action} className="space-y-5" noValidate>
       <FormMessage state={state} />
 
       <Field label="Título" htmlFor="title" error={e.title} required>
-        <Input id="title" name="title" defaultValue={v.title} required />
+        <Input data-testid="event-title" id="title" name="title" defaultValue={v.title} required />
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Tipo" htmlFor="type" error={e.type} required>
-          <Select id="type" name="type" defaultValue={v.type ?? 'HACKATHON'}>
+          <Select
+            data-testid="event-type"
+            id="type"
+            name="type"
+            defaultValue={v.type ?? 'HACKATHON'}
+          >
             {toOptions(eventTypeLabels).map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -33,7 +38,12 @@ export function EventForm() {
           </Select>
         </Field>
         <Field label="Origem" htmlFor="origin" error={e.origin} required>
-          <Select id="origin" name="origin" defaultValue={v.origin ?? 'INTERNAL'}>
+          <Select
+            data-testid="event-origin"
+            id="origin"
+            name="origin"
+            defaultValue={v.origin ?? 'INTERNAL'}
+          >
             {toOptions(eventOriginLabels).map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -52,6 +62,7 @@ export function EventForm() {
           required
         >
           <Input
+            data-testid="event-starts-at"
             id="startsAt"
             name="startsAt"
             type="datetime-local"
@@ -60,7 +71,13 @@ export function EventForm() {
           />
         </Field>
         <Field label="Término (opcional)" htmlFor="endsAt" error={e.endsAt}>
-          <Input id="endsAt" name="endsAt" type="datetime-local" defaultValue={v.endsAt} />
+          <Input
+            data-testid="event-ends-at"
+            id="endsAt"
+            name="endsAt"
+            type="datetime-local"
+            defaultValue={v.endsAt}
+          />
         </Field>
       </div>
 
@@ -71,16 +88,26 @@ export function EventForm() {
           error={e.location}
           hint="Endereço ou nome do espaço."
         >
-          <Input id="location" name="location" defaultValue={v.location} />
+          <Input
+            data-testid="event-location"
+            id="location"
+            name="location"
+            defaultValue={v.location}
+          />
         </Field>
         <label className="flex h-10 items-center gap-2 text-sm text-slate-700">
-          <Checkbox name="isOnline" defaultChecked={v.isOnline === 'on'} />
+          <Checkbox
+            data-testid="event-is-online"
+            name="isOnline"
+            defaultChecked={v.isOnline === 'on'}
+          />
           Evento online
         </label>
       </div>
 
       <Field label="Link externo (opcional)" htmlFor="externalUrl" error={e.externalUrl}>
         <Input
+          data-testid="event-external-url"
           id="externalUrl"
           name="externalUrl"
           type="url"
@@ -96,7 +123,14 @@ export function EventForm() {
           error={e.capacity}
           hint="Deixe vazio para ilimitado."
         >
-          <Input id="capacity" name="capacity" type="number" min={1} defaultValue={v.capacity} />
+          <Input
+            data-testid="event-capacity"
+            id="capacity"
+            name="capacity"
+            type="number"
+            min={1}
+            defaultValue={v.capacity}
+          />
         </Field>
         <Field
           label="Prioridade Premium até (opcional)"
@@ -105,6 +139,7 @@ export function EventForm() {
           hint="Até esta data só contas Premium se inscrevem."
         >
           <Input
+            data-testid="event-priority-until"
             id="priorityUntil"
             name="priorityUntil"
             type="datetime-local"
@@ -115,6 +150,7 @@ export function EventForm() {
 
       <Field label="Descrição" htmlFor="description" error={e.description} required>
         <Textarea
+          data-testid="event-description"
           id="description"
           name="description"
           rows={8}
@@ -123,7 +159,9 @@ export function EventForm() {
         />
       </Field>
 
-      <SubmitButton pendingText="Publicando...">Publicar evento</SubmitButton>
+      <SubmitButton data-testid="event-submit" pendingText="Publicando...">
+        Publicar evento
+      </SubmitButton>
     </form>
   );
 }

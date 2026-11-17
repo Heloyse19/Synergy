@@ -23,18 +23,24 @@ export function AttendanceForm({
   const [state, action] = useActionState(toggleAttendance, initialActionState);
 
   return (
-    <form action={action} className="space-y-3">
+    <form data-testid="event-attendance-form" action={action} className="space-y-3">
       <input type="hidden" name="eventId" value={eventId} />
       <input type="hidden" name="intent" value={attending ? 'leave' : 'join'} />
       <FormMessage state={state} />
 
       {attending ? (
-        <SubmitButton variant="outline" className="w-full" pendingText="Cancelando...">
+        <SubmitButton
+          data-testid="event-cancel-attendance"
+          variant="outline"
+          className="w-full"
+          pendingText="Cancelando..."
+        >
           <CalendarX className="size-4" aria-hidden />
           {isInvestor ? 'Cancelar presença' : 'Cancelar inscrição'}
         </SubmitButton>
       ) : (
         <SubmitButton
+          data-testid="event-join-attendance"
           className="w-full"
           pendingText="Confirmando..."
           disabled={Boolean(disabledReason)}
