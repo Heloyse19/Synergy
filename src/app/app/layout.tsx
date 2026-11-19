@@ -11,6 +11,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     { href: '/app/comunidade', label: 'Comunidade' },
     { href: '/app/eventos', label: 'Eventos' },
     { href: '/app/vagas', label: user.role === 'STARTUP' ? 'Minhas vagas' : 'Vagas' },
+    ...(user.role === 'STARTUP' || user.role === 'ADMIN'
+      ? [{ href: '/app/licitacoes', label: 'Licitações' }]
+      : []),
     { href: '/app/premium', label: 'Premium' },
     { href: '/app/perfil', label: 'Perfil' },
   ];

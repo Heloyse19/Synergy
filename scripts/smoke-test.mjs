@@ -147,6 +147,16 @@ try {
     r.html.includes('Minhas vagas') && r.html.includes('Publicar vaga'),
   );
 
+  // Licitações: só leitura (o smoke test não dispara a sincronização com o PNCP)
+  r = await get('/app/licitacoes', premium);
+  check(
+    'startup vê as licitações do próprio nicho',
+    r.res.status === 200 && r.html.includes('Licitações para Fintech'),
+    `status ${r.res.status}`,
+  );
+  r = await get('/app/licitacoes?nicho=todos&uf=todos', premium);
+  check('licitações sem filtro de nicho', r.html.includes('Licitações abertas'));
+
   // Criar vaga via formulário
   r = await get('/app/vagas/nova', premium);
   let hidden = formHidden(r.html, 'name="title"');
@@ -225,6 +235,13 @@ try {
   // Investidor confirma presença publicamente
   l = await login('investidor2@demo.local', 'Demo@123');
   const investor = l.cookie;
+  r = await get('/app/licitacoes', investor);
+  check(
+    'investidor não acessa as licitações',
+    r.res.status === 307 &&
+      (r.res.headers.get('location') ?? '').includes('/app?erro=sem-permissao'),
+    `status ${r.res.status}`,
+  );
   const pitch = detailPages.find((p) => p.html.includes('Pitch Day Fintech'));
   check('detalhe do pitch day acessível', Boolean(pitch));
   if (pitch) {
