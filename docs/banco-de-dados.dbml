@@ -13,6 +13,7 @@ Enum EventType { HACKATHON MEETUP PITCH_DAY WORKSHOP DEMO_DAY OTHER }
 Enum EventOrigin { INTERNAL EXTERNAL }
 Enum JobType { CLT PJ FREELANCE INTERNSHIP }
 Enum WorkMode { REMOTE HYBRID ONSITE }
+Enum TenderSyncStatus { RUNNING SUCCEEDED FAILED }
 
 Table User {
   id varchar(191) [pk]
@@ -168,4 +169,47 @@ Table LandingPageTemplate {
   description text [not null]
   category varchar(191) [not null]
   fileUrl varchar(191) [not null]
+}
+
+// Licitações abertas espelhadas da API oficial do PNCP (sem relação com as demais tabelas).
+Table Tender {
+  id varchar(191) [pk]
+  pncpId varchar(40) [not null, unique, note: 'número de controle PNCP']
+  object text [not null]
+  searchText text [not null, note: 'objeto normalizado para busca por palavra inteira']
+  agencyName varchar(191) [not null]
+  agencyCnpj char(14) [not null]
+  unitName varchar(191)
+  city varchar(191)
+  uf char(2) [not null]
+  modalityId int [not null]
+  modalityName varchar(191) [not null]
+  number varchar(191) [note: 'número da compra no órgão']
+  estimatedValue decimal(18,2) [note: 'nulo quando não informado ou sigiloso']
+  isPriceRegistration boolean [not null, default: false]
+  opensAt datetime
+  closesAt datetime [not null, note: 'fim do recebimento de propostas']
+  publishedAt datetime [not null]
+  sourceUrl varchar(500) [note: 'sistema onde a proposta é enviada']
+  lastSeenAt datetime [not null, note: 'última sincronização em que apareceu como aberta']
+  createdAt datetime [not null, default: `now()`]
+  updatedAt datetime [not null]
+
+  indexes {
+    (uf, closesAt)
+    closesAt
+  }
+}
+
+Table TenderSync {
+  uf char(2) [pk]
+  status TenderSyncStatus [not null]
+  startedAt datetime [not null]
+  heartbeatAt datetime [not null, note: 'sinal de vida da execução em andamento']
+  completedAt datetime [note: 'fim da última sincronização completa']
+  pagesDone int [not null, default: 0]
+  totalPages int
+  tenderCount int [not null, default: 0]
+  error varchar(300)
+  updatedAt datetime [not null]
 }

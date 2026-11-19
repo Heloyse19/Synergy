@@ -38,6 +38,7 @@ export function createRateLimiter(options: { limit: number; windowMs: number }) 
 type Limiters = {
   login: ReturnType<typeof createRateLimiter>;
   register: ReturnType<typeof createRateLimiter>;
+  tenderSync: ReturnType<typeof createRateLimiter>;
 };
 
 // Guardado em globalThis para sobreviver ao hot reload em desenvolvimento.
@@ -46,4 +47,6 @@ const globalLimiters = globalThis as unknown as { __synergyLimiters?: Limiters }
 export const limiters: Limiters = (globalLimiters.__synergyLimiters ??= {
   login: createRateLimiter({ limit: 10, windowMs: 15 * 60 * 1000 }),
   register: createRateLimiter({ limit: 5, windowMs: 60 * 60 * 1000 }),
+  // Cada sincronização de licitações faz dezenas de chamadas ao PNCP: poucos estados por hora por usuário.
+  tenderSync: createRateLimiter({ limit: 5, windowMs: 60 * 60 * 1000 }),
 });

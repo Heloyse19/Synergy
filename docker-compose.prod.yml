@@ -20,6 +20,7 @@ services:
       TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY:-}
       TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
       SHOW_DEMO_ACCOUNTS: ${SHOW_DEMO_ACCOUNTS:-false}
+      PNCP_USER_AGENT: ${PNCP_USER_AGENT:-}
     networks: [internal]
     logging:
       driver: json-file
