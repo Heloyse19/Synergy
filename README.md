@@ -110,10 +110,34 @@ Para ver as contas de demonstração na tela de login, adicione `SHOW_DEMO_ACCOU
 
 ```bash
 docker compose up -d                        # só o banco (uso diário em desenvolvimento)
+docker compose --profile dev up -d          # banco + `next dev` em container, com hot reload, em http://localhost:3000
 docker compose --profile full up --build    # banco + aplicação com a imagem de produção, em http://localhost:3000
 ```
 
 A imagem de produção aplica as migrações automaticamente ao iniciar (`docker-entrypoint.sh`).
+
+### Desenvolvimento dentro do container (perfil `dev`)
+
+Alternativa ao `npm run dev` no host, sem precisar do Node 22 instalado. O código do projeto é espelhado em
+`/app` por _bind mount_ (editou no host, o Next recompila no container); `node_modules` e `.next` ficam em
+volumes do Docker, separados dos do host. O `-d` devolve o terminal na hora.
+
+```bash
+docker compose --profile dev up -d                    # sobe em segundo plano (1ª vez: build + npm ci, ~2 min)
+docker compose logs -f dev                            # acompanha os logs (Ctrl+C sai dos logs, não derruba o app)
+docker compose exec dev npm run db:migrate            # comandos do projeto rodam dentro do container
+docker compose exec dev npm run db:seed
+docker compose --profile dev stop dev                 # para só a aplicação (o banco continua de pé)
+APP_PORT=3001 docker compose --profile dev up -d      # outra porta, se a 3000 já estiver em uso no host
+```
+
+- Dependências novas: ao mudar o `package-lock.json`, rode `docker compose restart dev` — o container refaz o
+  `npm ci` sozinho. O `npm install` do host continua valendo para o editor (tipos, ESLint, Prettier).
+- O container usa `DATABASE_URL` apontando para `db:3306`; as demais variáveis vêm do seu `.env`.
+- No Windows, mantenha o projeto dentro do WSL 2 (`/home/...`), não em `/mnt/c`: fora dele o Docker não
+  repassa os eventos de arquivo e o hot reload fica lento ou não dispara.
+- O container roda com o usuário `node` (uid 1000). Se o seu usuário no host tiver outro uid, os arquivos
+  gerados no projeto (ex.: `src/generated`) podem ficar com dono diferente.
 
 ## Deploy e CI/CD
 
