@@ -1,0 +1,20 @@
+# syntax=docker/dockerfile:1.7
+# Imagem de DESENVOLVIMENTO (serviço `dev` do docker-compose.yml).
+# Só traz o Node: o código-fonte entra por bind mount, por isso nada do projeto é copiado aqui.
+
+ARG NODE_VERSION=22
+
+FROM node:${NODE_VERSION}-alpine
+RUN apk add --no-cache libc6-compat
+
+# node_modules e .next ficam em volumes nomeados. Os diretórios precisam existir na imagem com o dono
+# `node` (uid 1000) para que os volumes herdem a permissão de escrita — e, rodando como `node`, os
+# arquivos gerados no bind mount (ex.: src/generated) não ficam como root no host.
+RUN mkdir -p /app/node_modules /app/.next && chown -R node:node /app
+
+WORKDIR /app
+USER node
+ENV NEXT_TELEMETRY_DISABLED=1
+EXPOSE 3000
+
+CMD ["sh", "scripts/docker-dev.sh"]

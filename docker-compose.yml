@@ -1,7 +1,9 @@
 # Ambiente de DESENVOLVIMENTO.
-#   Só o banco:            docker compose up -d
-#   Banco + app em Docker: docker compose --profile full up --build
-# A aplicação em dev roda no host com `npm run dev` (hot reload) apontando para localhost:3306.
+#   Só o banco:                  docker compose up -d
+#   Banco + next dev em Docker:  docker compose --profile dev up -d    (hot reload via bind mount)
+#   Banco + imagem de produção:  docker compose --profile full up --build
+# No dia a dia a aplicação roda no host com `npm run dev` (hot reload) apontando para localhost:3306;
+# o perfil `dev` é a alternativa para rodar o mesmo `next dev` dentro de um container.
 services:
   db:
     image: mysql:8.4
@@ -45,5 +47,31 @@ services:
     ports:
       - '3000:3000'
 
+  # Opcional: Next.js em modo dev (hot reload) dentro do container. O código do host é espelhado em
+  # /app por bind mount; node_modules e .next ficam em volumes do Docker para não se misturarem com
+  # os do host (binários nativos e cache do `next dev` são específicos de cada ambiente).
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: synergy:dev
+    container_name: synergy-dev
+    profiles: ['dev']
+    init: true
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Tem precedência sobre o DATABASE_URL do .env (127.0.0.1): dentro da rede do Compose o host é `db`.
+      DATABASE_URL: mysql://root:root@db:3306/synergy
+    ports:
+      - '${APP_PORT:-3000}:3000'
+    volumes:
+      - .:/app
+      - dev_node_modules:/app/node_modules
+      - dev_next:/app/.next
+
 volumes:
   db_data:
+  dev_node_modules:
+  dev_next:
