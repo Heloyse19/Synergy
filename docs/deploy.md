@@ -64,9 +64,10 @@ ssh-keygen -t ed25519 -C "github-actions-synergy" -f synergy_deploy_key -N ""
 1. Painel Cloudflare → **Zero Trust** → **Networks** → **Tunnels** → **Create a tunnel** → _Cloudflared_.
 2. Nome: `synergy`. Em _Install and run a connector_ escolha **Docker** e copie apenas o **token**
    (a parte depois de `--token`). Cole em `CLOUDFLARE_TUNNEL_TOKEN` no `.env` do servidor.
-3. Aba **Public Hostname** → _Add a public hostname_:
+3. No túnel, adicione uma rota do tipo **Published application** (no painel antigo: aba _Public Hostname_):
    - Subdomain: `synergy` (ou vazio para o domínio raiz) · Domain: seu domínio
-   - Service: **HTTP** · URL: `app:3000`
+   - Service URL: `http://app:3000` — HTTP, não HTTPS: o TLS termina na Cloudflare e, com `https`, o túnel
+     não consegue falar com a aplicação (erro 502).
      A Cloudflare cria o registro DNS (CNAME → túnel) com proxy ativado automaticamente.
 
 ## 3. Primeiro deploy (manual)
@@ -109,33 +110,55 @@ Tudo abaixo está disponível no plano **Free**, salvo indicação.
 
 ### SSL/TLS
 
-- **SSL/TLS → Overview**: modo _Full (strict)_ (com túnel, a Cloudflare já valida a conexão).
-- **Edge Certificates**: ative _Always Use HTTPS_, _Automatic HTTPS Rewrites_, _HSTS_ (max-age 6 meses,
-  include subdomains) e _Minimum TLS Version_ = 1.2.
+- **SSL/TLS → Overview**: mantenha o modo padrão (com túnel, o trecho Cloudflare → servidor já é protegido).
+- **Edge Certificates**: ative _Always Use HTTPS_ e _Automatic HTTPS Rewrites_ e defina _Minimum TLS Version_
+  = 1.2. Não é preciso ativar o HSTS no painel: a aplicação já envia o cabeçalho (`next.config.ts`) só para
+  o próprio host, sem afetar outros subdomínios do domínio.
 
-### WAF (Security → WAF)
+### WAF (Security → Security rules)
 
-1. **Managed rules**: ative o _Cloudflare Managed Ruleset_ (no Free é o conjunto gratuito) — bloqueia
-   exploits conhecidos, injeções e scanners.
-2. **Custom rules** (até 5 no Free) — sugestões:
+1. **Managed rules**: confira em Security → Settings que o conjunto gratuito da Cloudflare está ativo — ele
+   bloqueia exploits conhecidos, injeções e scanners.
+2. **Custom rules** (até 5 no Free). Restrinja cada regra ao host da aplicação, para não afetar outros
+   subdomínios, e use _Edit expression_ para colar a expressão.
 
-   | Nome                                  | Expressão                                                                                                   | Ação              |
-   | ------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------------- |
-   | Bloquear caminhos de scanners         | `(http.request.uri.path matches "^/(wp-admin                                                                | wp-login\\.php    | xmlrpc\\.php | \\.env | \\.git | phpmyadmin)")` | Block |
-   | Desafiar automações no login/cadastro | `(http.request.uri.path in {"/login" "/cadastro"} and http.request.method eq "POST" and not cf.client.bot)` | Managed Challenge |
-   | Bloquear métodos não usados           | `(not http.request.method in {"GET" "POST" "HEAD" "OPTIONS"})`                                              | Block             |
+   **Bloquear caminhos de scanners** — ação _Block_:
 
-3. **Rate limiting rules** (1 regra no Free): expressão
-   `(http.request.uri.path in {"/login" "/cadastro"} and http.request.method eq "POST")`,
-   característica _IP_, **10 requisições / 10 segundos**, ação _Block_ por 10 segundos (ou _Managed Challenge_).
-   Isso complementa o limitador em memória da aplicação (10 tentativas de login / 15 min por IP + e-mail).
+   ```
+   (http.host eq "synergy.seudominio.com.br") and (http.request.uri.path contains "/wp-admin" or http.request.uri.path contains "/wp-login.php" or http.request.uri.path contains "/xmlrpc.php" or http.request.uri.path contains "/.env" or http.request.uri.path contains "/.git" or http.request.uri.path contains "/phpmyadmin")
+   ```
 
-### Proteção contra bots (Security → Bots)
+   **Bloquear métodos não usados** — ação _Block_:
 
-- Ative **Bot Fight Mode** (Free). Ele desafia tráfego automatizado conhecido. No plano Pro, _Super Bot
-  Fight Mode_ permite ajustar ações para bots "definitivamente automatizados" e "provavelmente automatizados".
-- **Security → Settings**: _Security Level_ = Medium e _Browser Integrity Check_ ativado.
-- Em caso de ataque, ative **Under Attack Mode** temporariamente (desafio JavaScript para todos).
+   ```
+   (http.host eq "synergy.seudominio.com.br") and (not http.request.method in {"GET" "POST" "HEAD" "OPTIONS"})
+   ```
+
+   O operador `matches` (regex) só existe nos planos Business e Enterprise; no Free use `contains`.
+
+3. **Não use _Managed Challenge_ nos envios de `/login` e `/cadastro`.** Os formulários enviam os dados por
+   Server Actions (requisições `fetch`), em que o desafio não pode ser exibido: o envio falharia para todos.
+   Quem protege os formulários é o Turnstile (abaixo) e o limitador da aplicação.
+4. **Rate limiting rule** (opcional, 1 regra no Free). Se criar, use o tipo _Rate limiting rule_ — uma
+   _Custom rule_ com ação _Block_ e a mesma expressão bloqueia todo acesso às telas. Expressão
+   `(http.request.uri.path eq "/login" or http.request.uri.path eq "/cadastro")`, característica _IP_,
+   20 requisições / 10 segundos. É só um reforço do limitador em memória da aplicação (10 tentativas de
+   login / 15 min por IP + e-mail e 5 cadastros / hora por IP).
+
+Para testar: `https://synergy.seudominio.com.br/wp-admin` deve mostrar a página de bloqueio da Cloudflare, e
+o login deve continuar funcionando. Se algo legítimo for bloqueado, Security → Analytics → Events mostra a
+regra responsável (procure pelo _Ray ID_ do rodapé da página de bloqueio).
+
+### Proteção contra bots (Security → Settings)
+
+- Ative **Bot Fight Mode** (Free). Ele desafia tráfego automatizado conhecido, o que inclui verificações
+  feitas de fora por `curl` ou monitores: `/api/health` passa a responder com um desafio (HTTP 403) para
+  eles. Verifique a saúde pelo navegador ou a partir do próprio servidor. No plano Pro, _Super Bot Fight
+  Mode_ permite ajustar ações para bots "definitivamente automatizados" e "provavelmente automatizados".
+- Em caso de ataque, ative **Under Attack Mode** temporariamente (página _Overview_ do domínio → _Quick
+  Actions_). Ele exibe um desafio para todos os visitantes; desligue quando o ataque passar. Se optar por
+  mantê-lo ligado, aumente o _Challenge Passage_ (Security → Settings), que define por quanto tempo quem já
+  passou pelo desafio fica liberado (o padrão é 30 minutos).
 
 ### Turnstile (CAPTCHA invisível nos formulários)
 
@@ -173,6 +196,10 @@ _Required reviewers_ para aprovar deploys manualmente) e adicione:
 
 Sem esses secrets o job de deploy é **ignorado com um aviso** (o CI e a publicação da imagem continuam
 funcionando), então o pipeline pode ser adotado em etapas.
+
+Com o Bot Fight Mode ativo, a verificação de `/api/health` feita pelo job `deploy` parte de fora e pode
+receber um desafio da Cloudflare, falhando mesmo com a aplicação saudável. Nesse caso, deixe a variável
+`APP_URL` vazia para pular essa etapa.
 
 ### Alternativa sem secrets: a VPS busca a imagem nova
 
@@ -243,7 +270,8 @@ a mudança (nunca edite migrações já aplicadas).
 docker compose -f docker-compose.prod.yml ps                 # estado dos containers
 docker compose -f docker-compose.prod.yml logs -f app        # logs da aplicação
 docker compose -f docker-compose.prod.yml logs -f cloudflared
-curl -s https://synergy.seudominio.com.br/api/health          # {"status":"ok","db":"up",...}
+# saúde, de dentro do servidor (de fora, o Bot Fight Mode desafia o curl): {"status":"ok","db":"up",...}
+docker compose -f docker-compose.prod.yml exec app curl -s http://127.0.0.1:3000/api/health
 ```
 
 **Backup do banco** (agende com cron, ex.: diariamente às 3h):
@@ -271,8 +299,8 @@ durante uma sincronização, basta pedi-la de novo na página.
 - [ ] `SESSION_SECRET`, `MYSQL_PASSWORD` e `MYSQL_ROOT_PASSWORD` fortes e únicos
 - [ ] `SHOW_DEMO_ACCOUNTS=false` e contas `*@demo.local` removidas (ou senhas trocadas)
 - [ ] Senha do admin (`admin@synergy.local`) alterada
-- [ ] Tunnel ativo, DNS com proxy (nuvem laranja), _Always Use HTTPS_ e HSTS ligados
-- [ ] Managed ruleset, regras customizadas, rate limiting e Bot Fight Mode ativos
+- [ ] Tunnel ativo, DNS com proxy (nuvem laranja) e _Always Use HTTPS_ ligado
+- [ ] Managed ruleset, regras customizadas e Bot Fight Mode ativos; login e cadastro testados depois das regras
 - [ ] Turnstile configurado
 - [ ] Backups agendados e testados (restaure em um ambiente local pelo menos uma vez)
 - [ ] Branch `main` protegida e environment `production` com revisores
