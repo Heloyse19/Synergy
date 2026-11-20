@@ -157,6 +157,7 @@ Passo a passo completo em [`docs/deploy.md`](docs/deploy.md).
 - [Deploy com Docker, Cloudflare e CI/CD](docs/deploy.md)
 - [Guia de contribuição (fluxo de trabalho e convenções)](docs/contribuindo.md)
 - [Roadmap do produto (requisitos × status × backlog)](docs/roadmap-do-produto.md)
+- [Guia de uso e roteiro de demonstração (PDF)](docs/synergy-guia-de-uso.pdf)
 
 ## Equipe
 
