@@ -78,10 +78,10 @@ A primeira etapa (encontrar editais) está pronta. Próximos passos, em ordem su
 
 ## Próximas entregas do checkpoint (mapeamento)
 
-| Entrega prevista                               | Situação                                                             |
-| ---------------------------------------------- | -------------------------------------------------------------------- |
-| Concluir a modelagem do banco MySQL            | ✅ `prisma/schema.prisma` + `docs/banco-de-dados.dbml`               |
-| Criar o repositório oficial no GitHub          | ✅ `Heloyse19/Synergy` com CI/CD, templates de issue/PR e Dependabot |
-| Wireframes das telas de eventos e vagas        | ✅ Telas implementadas (podem servir de base para refinar o design)  |
-| Configurar o ambiente de desenvolvimento local | ✅ `docker compose up -d` + `npm run dev` (README)                   |
-| Validar protótipos com o grupo                 | 🔜 Rodar o MVP com as contas de demonstração e coletar feedback      |
+| Entrega prevista                               | Situação                                                              |
+| ---------------------------------------------- | --------------------------------------------------------------------- |
+| Concluir a modelagem do banco MySQL            | ✅ `prisma/schema.prisma` + `docs/banco-de-dados.dbml`                |
+| Criar o repositório oficial no GitHub          | ✅ `Synergy-PI/Synergy` com CI/CD, templates de issue/PR e Dependabot |
+| Wireframes das telas de eventos e vagas        | ✅ Telas implementadas (podem servir de base para refinar o design)   |
+| Configurar o ambiente de desenvolvimento local | ✅ `docker compose up -d` + `npm run dev` (README)                    |
+| Validar protótipos com o grupo                 | 🔜 Rodar o MVP com as contas de demonstração e coletar feedback       |

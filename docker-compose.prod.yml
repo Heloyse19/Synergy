@@ -6,7 +6,7 @@
 # Nenhuma porta é publicada no host: o tráfego entra pelo túnel da Cloudflare (HTTPS, WAF, bots).
 services:
   app:
-    image: ${APP_IMAGE:-ghcr.io/heloyse19/synergy:latest}
+    image: ${APP_IMAGE:-ghcr.io/synergy-pi/synergy:latest}
     container_name: synergy-app
     restart: unless-stopped
     depends_on:
