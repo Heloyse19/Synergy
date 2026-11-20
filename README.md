@@ -24,6 +24,7 @@ burocrático guiado (recursos Premium).
 | Painel           | Abas Comunidade, Eventos, Vagas e Premium; resumo por perfil; edição de perfil                                                                                                                          |
 | Eventos          | Listagem pública (próximos/passados), detalhe, investidores anjo **confirmam presença publicamente**, inscrição com **janela de prioridade Premium** e capacidade; criação por administradores          |
 | Vagas            | Mural público com filtros (busca, tipo, modelo); startups **publicam, editam, ativam/desativam e excluem** suas vagas                                                                                   |
+| Licitações       | Startups veem os **editais com propostas abertas no PNCP que combinam com o seu nicho**, com filtros (palavra-chave, estado, modalidade), motivo da aderência e link para o edital oficial              |
 | Premium          | Bloqueio de recursos para o plano gratuito; ativação simulada (sem pagamento); comunidade (fórum com respostas); roadmap burocrático com progresso por startup; templates de landing page para captação |
 | Infra            | Docker (dev e produção), CI/CD no GitHub Actions, deploy com Cloudflare Tunnel + WAF + Bot Fight Mode + Turnstile                                                                                       |
 
@@ -90,13 +91,15 @@ Para ver as contas de demonstração na tela de login, adicione `SHOW_DEMO_ACCOU
 ├── public/templates/       # templates de landing page (recurso Premium)
 ├── src/
 │   ├── app/                # rotas (App Router): páginas públicas, (auth), app/ (área logada), api/
-│   ├── actions/            # Server Actions: todas as mutações (auth, vagas, eventos, fórum, perfil, plano)
-│   ├── components/         # ui/ (botões, inputs, cards...), layout/, events/, jobs/, premium/, auth/
+│   ├── actions/            # Server Actions: todas as mutações (auth, vagas, eventos, fórum, perfil, plano, licitações)
+│   ├── components/         # ui/ (botões, inputs, cards...), layout/, events/, jobs/, tenders/, premium/, auth/
 │   ├── lib/
 │   │   ├── auth/           # sessão (JWT), senha (bcrypt), DAL (verificação de acesso)
 │   │   ├── data/           # consultas ao banco usadas pelas páginas
 │   │   ├── validations/    # schemas Zod dos formulários
 │   │   ├── plan.ts         # regras do Premium e da prioridade em eventos
+│   │   ├── tenders/        # licitações: termos por nicho, aderência, filtros e sincronização
+│   │   ├── pncp/           # cliente da API oficial do PNCP
 │   │   └── prisma.ts       # instância do Prisma Client
 │   ├── generated/prisma/   # Prisma Client gerado (não versionado)
 │   └── proxy.ts            # redirecionamentos de autenticação (antigo middleware)

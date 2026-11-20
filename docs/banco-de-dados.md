@@ -63,36 +63,64 @@ erDiagram
     string category
     string fileUrl
   }
+  Tender {
+    string id PK
+    string pncpId UK "número de controle PNCP"
+    text object
+    text searchText "objeto normalizado para busca"
+    string agencyName
+    string uf
+    string modalityName
+    decimal estimatedValue
+    datetime closesAt
+    datetime lastSeenAt
+  }
+  TenderSync {
+    string uf PK
+    enum status "RUNNING | SUCCEEDED | FAILED"
+    datetime heartbeatAt
+    datetime completedAt
+    int pagesDone
+    int totalPages
+    int tenderCount
+  }
 ```
+
+`Tender` e `TenderSync` não se relacionam com as demais tabelas: são um espelho das licitações abertas no
+PNCP (ver [Licitações](arquitetura.md#licitações-integração-com-o-pncp)). O vínculo com a startup é calculado
+em tempo de consulta, a partir do nicho.
 
 ## Tabelas
 
-| Tabela                     | Finalidade                                                                                                   |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `User`                     | Conta de acesso: e-mail único, hash da senha, perfil (`role`) e plano (`plan`). Nunca exponha `passwordHash` |
-| `Niche`                    | Nichos de mercado (fintech, healthtech...). Carregados pelo seed; usados para segmentar startups             |
-| `StartupProfile`           | Dados da startup (1:1 com `User` de perfil STARTUP): nome, pitch, estágio, nicho, cidade, site               |
-| `InvestorProfile`          | Dados do investidor anjo: empresa/fundo, tese, faixa de ticket, LinkedIn                                     |
-| `ProfessionalProfile`      | Dados do profissional: título, bio, habilidades, links, disponibilidade para freelance                       |
-| `Event`                    | Eventos internos ou externos: datas, local/online, capacidade, `priorityUntil` (janela Premium)              |
-| `EventAttendance`          | Inscrição/presença (única por evento + usuário). Para investidores, é a presença pública                     |
-| `JobPosting`               | Vagas publicadas por startups: tipo, modelo de trabalho, faixa salarial, habilidades, ativa/inativa          |
-| `ForumPost` / `ForumReply` | Comunidade (Premium): publicações e respostas com autor                                                      |
-| `RoadmapStep`              | Passos do roadmap burocrático agrupados por fase (seed)                                                      |
-| `RoadmapProgress`          | Passos concluídos por startup (único por startup + passo)                                                    |
-| `LandingPageTemplate`      | Catálogo de templates (arquivos em `public/templates`)                                                       |
+| Tabela                     | Finalidade                                                                                                                                                          |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `User`                     | Conta de acesso: e-mail único, hash da senha, perfil (`role`) e plano (`plan`). Nunca exponha `passwordHash`                                                        |
+| `Niche`                    | Nichos de mercado (fintech, healthtech...). Carregados pelo seed; usados para segmentar startups                                                                    |
+| `StartupProfile`           | Dados da startup (1:1 com `User` de perfil STARTUP): nome, pitch, estágio, nicho, cidade, site                                                                      |
+| `InvestorProfile`          | Dados do investidor anjo: empresa/fundo, tese, faixa de ticket, LinkedIn                                                                                            |
+| `ProfessionalProfile`      | Dados do profissional: título, bio, habilidades, links, disponibilidade para freelance                                                                              |
+| `Event`                    | Eventos internos ou externos: datas, local/online, capacidade, `priorityUntil` (janela Premium)                                                                     |
+| `EventAttendance`          | Inscrição/presença (única por evento + usuário). Para investidores, é a presença pública                                                                            |
+| `JobPosting`               | Vagas publicadas por startups: tipo, modelo de trabalho, faixa salarial, habilidades, ativa/inativa                                                                 |
+| `ForumPost` / `ForumReply` | Comunidade (Premium): publicações e respostas com autor                                                                                                             |
+| `RoadmapStep`              | Passos do roadmap burocrático agrupados por fase (seed)                                                                                                             |
+| `RoadmapProgress`          | Passos concluídos por startup (único por startup + passo)                                                                                                           |
+| `LandingPageTemplate`      | Catálogo de templates (arquivos em `public/templates`)                                                                                                              |
+| `Tender`                   | Licitações com propostas abertas copiadas da API oficial do PNCP (única por `pncpId`); `searchText` é o objeto normalizado usado na busca por nicho e palavra-chave |
+| `TenderSync`               | Controle da sincronização de licitações por estado (uma linha por UF): situação, progresso e data da última atualização completa                                    |
 
 ### Enums
 
-| Enum           | Valores                                                             |
-| -------------- | ------------------------------------------------------------------- |
-| `Role`         | `STARTUP`, `INVESTOR`, `PROFESSIONAL`, `ADMIN`                      |
-| `Plan`         | `FREE`, `PREMIUM`                                                   |
-| `StartupStage` | `IDEA`, `VALIDATION`, `MVP`, `TRACTION`, `SCALE`                    |
-| `EventType`    | `HACKATHON`, `MEETUP`, `PITCH_DAY`, `WORKSHOP`, `DEMO_DAY`, `OTHER` |
-| `EventOrigin`  | `INTERNAL`, `EXTERNAL`                                              |
-| `JobType`      | `CLT`, `PJ`, `FREELANCE`, `INTERNSHIP`                              |
-| `WorkMode`     | `REMOTE`, `HYBRID`, `ONSITE`                                        |
+| Enum               | Valores                                                             |
+| ------------------ | ------------------------------------------------------------------- |
+| `Role`             | `STARTUP`, `INVESTOR`, `PROFESSIONAL`, `ADMIN`                      |
+| `Plan`             | `FREE`, `PREMIUM`                                                   |
+| `StartupStage`     | `IDEA`, `VALIDATION`, `MVP`, `TRACTION`, `SCALE`                    |
+| `EventType`        | `HACKATHON`, `MEETUP`, `PITCH_DAY`, `WORKSHOP`, `DEMO_DAY`, `OTHER` |
+| `EventOrigin`      | `INTERNAL`, `EXTERNAL`                                              |
+| `JobType`          | `CLT`, `PJ`, `FREELANCE`, `INTERNSHIP`                              |
+| `WorkMode`         | `REMOTE`, `HYBRID`, `ONSITE`                                        |
+| `TenderSyncStatus` | `RUNNING`, `SUCCEEDED`, `FAILED`                                    |
 
 Os rótulos em português de cada valor ficam em `src/lib/labels.ts`.
 
@@ -105,15 +133,20 @@ Os rótulos em português de cada valor ficam em `src/lib/labels.ts`.
 - Textos longos usam `@db.Text`; o restante é `VARCHAR(191)` (padrão do Prisma para MySQL com utf8mb4).
 - Datas são armazenadas em UTC. Entradas de formulário são interpretadas como horário de Brasília
   (`parseDateTimeLocal`) e exibidas com `Intl` em `America/Sao_Paulo` (`src/lib/format.ts`).
+- `Tender` guarda apenas licitações que aceitam propostas: as encerradas, revogadas ou suspensas são
+  removidas ao fim de cada sincronização do estado. Não crie chaves estrangeiras para `Tender` sem antes
+  trocar essa remoção por uma marcação (ver backlog em `docs/roadmap-do-produto.md`).
 
 ## Como alterar o modelo
 
 ```bash
 # 1. Edite prisma/schema.prisma
-# 2. Gere e aplique a migração no banco local (também regenera o Prisma Client)
+# 2. Gere e aplique a migração no banco local
 npm run db:migrate -- --name adiciona_campo_x
-# 3. Commite a pasta prisma/migrations/<timestamp>_adiciona_campo_x junto com o código
-# 4. Atualize este documento e o DBML
+# 3. Regenere o Prisma Client (no Prisma 7 o `migrate dev` não faz isso) e reinicie o `npm run dev`
+npm run db:generate
+# 4. Commite a pasta prisma/migrations/<timestamp>_adiciona_campo_x junto com o código
+# 5. Atualize este documento e o DBML
 ```
 
 Em produção o container executa `prisma migrate deploy` ao iniciar, aplicando apenas as migrações pendentes.

@@ -5,6 +5,7 @@ import {
   Briefcase,
   CalendarDays,
   Crown,
+  Landmark,
   LayoutTemplate,
   Lock,
   MessageSquare,
@@ -15,6 +16,7 @@ import { requireUser } from '@/lib/auth/dal';
 import { getDashboardStats } from '@/lib/data/dashboard';
 import { listEvents, listUserEvents } from '@/lib/data/events';
 import { listActiveJobs, listJobsByStartup } from '@/lib/data/jobs';
+import { countTendersForStartup } from '@/lib/data/tenders';
 import { formatDateTime } from '@/lib/format';
 import { eventTypeLabels, roleLabels } from '@/lib/labels';
 import { hasPremium } from '@/lib/plan';
@@ -36,7 +38,7 @@ export default async function DashboardPage({
   const [user, params] = await Promise.all([requireUser(), searchParams]);
   const premium = hasPremium(user);
 
-  const [stats, upcomingEvents, myEvents, myJobs, recentJobs] = await Promise.all([
+  const [stats, upcomingEvents, myEvents, myJobs, recentJobs, matchingTenders] = await Promise.all([
     getDashboardStats(),
     listEvents('upcoming', 3),
     listUserEvents(user.id),
@@ -44,6 +46,7 @@ export default async function DashboardPage({
     user.role === 'PROFESSIONAL' || user.role === 'INVESTOR'
       ? listActiveJobs({ limit: 3 })
       : Promise.resolve([]),
+    user.startup ? countTendersForStartup(user.startup) : Promise.resolve(0),
   ]);
 
   const firstName = user.name.split(' ')[0];
@@ -213,6 +216,31 @@ export default async function DashboardPage({
                   className={buttonVariants({ variant: 'outline', size: 'sm' })}
                 >
                   Gerenciar vagas
+                </Link>
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {user.role === 'STARTUP' ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Landmark className="size-4 text-brand-600" aria-hidden />
+                  Licitações
+                </CardTitle>
+                <CardDescription>
+                  {matchingTenders > 0
+                    ? `${matchingTenders.toLocaleString('pt-BR')} ${matchingTenders === 1 ? 'edital aberto combina' : 'editais abertos combinam'} com o nicho da sua startup.`
+                    : 'Encontre editais públicos abertos que combinam com o nicho da sua startup.'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link
+                  data-testid="dashboard-tenders-link"
+                  href="/app/licitacoes"
+                  className={buttonVariants({ variant: 'outline', size: 'sm' })}
+                >
+                  Ver licitações
                 </Link>
               </CardContent>
             </Card>

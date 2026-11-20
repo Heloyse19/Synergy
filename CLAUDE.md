@@ -17,5 +17,7 @@ Leia `README.md` e `docs/arquitetura.md` antes de alterar a estrutura.
 - Leituras em `src/lib/data/*` com `select` explícito; nunca retornar `passwordHash`.
 - Autorização definitiva na DAL (`src/lib/auth/dal.ts`); `src/proxy.ts` é apenas verificação otimista.
 - Regras do Premium/prioridade de eventos em `src/lib/plan.ts` (puras, com testes).
+- Licitações: termos por nicho e aderência em `src/lib/tenders/niches.ts` (puros, com testes); o PNCP é
+  consultado só pela API oficial (`src/lib/pncp`), nunca pela busca do portal (`/api/search`).
 - Após mudar `prisma/schema.prisma`: criar migração, atualizar `docs/banco-de-dados.md` e `docs/banco-de-dados.dbml`.
 - Rodar `npm run format` antes de finalizar.

@@ -22,6 +22,7 @@ const daysFromNow = (days: number, hour = 19) => {
 };
 
 async function seedNiches() {
+  // Ao incluir um nicho, defina também os termos de licitação dele em src/lib/tenders/niches.ts.
   const niches = [
     'Fintech',
     'Healthtech',

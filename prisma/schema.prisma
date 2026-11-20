@@ -66,6 +66,13 @@ enum WorkMode {
   ONSITE
 }
 
+/// Situação da sincronização de licitações de um estado com o PNCP.
+enum TenderSyncStatus {
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
 // ---------------------------------------------------------------------------
 // Usuários e perfis
 // ---------------------------------------------------------------------------
@@ -279,4 +286,64 @@ model LandingPageTemplate {
   description String @db.Text
   category    String
   fileUrl     String
+}
+
+// ---------------------------------------------------------------------------
+// Licitações (espelho do PNCP para busca por nicho)
+// ---------------------------------------------------------------------------
+
+/// Licitação com propostas abertas, copiada da API oficial de consultas do PNCP.
+/// A API não tem busca por palavra-chave, por isso o casamento com o nicho é feito aqui (src/lib/tenders).
+model Tender {
+  id                  String    @id @default(cuid())
+  /// Número de controle PNCP (ex.: "78200482000110-1-000010/2026"): identidade oficial da contratação.
+  pncpId              String    @unique @db.VarChar(40)
+  /// Objeto da contratação, como publicado pelo órgão.
+  object              String    @db.Text
+  /// Objeto normalizado (minúsculas, sem acentos, plural reduzido, com espaço nas pontas) para busca
+  /// por palavra inteira com LIKE. Gerado por `toSearchText` em src/lib/tenders/text.ts.
+  searchText          String    @db.Text
+  agencyName          String
+  agencyCnpj          String    @db.Char(14)
+  unitName            String?
+  city                String?
+  uf                  String    @db.Char(2)
+  modalityId          Int
+  modalityName        String
+  /// Número da compra no órgão (não confundir com o sequencial do PNCP).
+  number              String?
+  /// Valor total estimado em reais; nulo quando não informado ou sigiloso.
+  estimatedValue      Decimal?  @db.Decimal(18, 2)
+  /// Sistema de Registro de Preços (SRP).
+  isPriceRegistration Boolean   @default(false)
+  opensAt             DateTime?
+  /// Fim do recebimento de propostas.
+  closesAt            DateTime
+  publishedAt         DateTime
+  /// Link do sistema de origem, onde a proposta é enviada (quando informado pelo órgão).
+  sourceUrl           String?   @db.VarChar(500)
+  /// Última sincronização em que a licitação apareceu como aberta (usado para remover as encerradas).
+  lastSeenAt          DateTime
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([uf, closesAt])
+  @@index([closesAt])
+}
+
+/// Controle da sincronização de licitações por estado (uma linha por UF).
+model TenderSync {
+  uf          String           @id @db.Char(2)
+  status      TenderSyncStatus
+  startedAt   DateTime
+  /// Atualizado a cada página processada; permite detectar execuções interrompidas.
+  heartbeatAt DateTime
+  /// Fim da última sincronização completa (define a "idade" dos dados exibidos).
+  completedAt DateTime?
+  pagesDone   Int              @default(0)
+  totalPages  Int?
+  /// Licitações abertas do estado após a última sincronização completa.
+  tenderCount Int              @default(0)
+  error       String?          @db.VarChar(300)
+  updatedAt   DateTime         @updatedAt
 }

@@ -209,6 +209,13 @@ docker compose -f docker-compose.prod.yml exec -T db \
 **Métricas e segurança**: Cloudflare → _Analytics & Logs_ (tráfego, cache) e _Security → Events_
 (requisições bloqueadas/desafiadas pelo WAF, rate limiting e Bot Fight Mode).
 
+**Licitações (PNCP)**: a aba Licitações consulta `https://pncp.gov.br/api/consulta` a partir do container
+`app` (conexão de saída, sem configuração extra). Defina `PNCP_USER_AGENT` no `.env` do servidor para
+identificar o sistema nas chamadas, ex.: `Synergy/1.0 (+https://synergy.seudominio.com.br)`. Cada estado é
+sincronizado sob demanda pelo botão da página (leva vários minutos e roda em segundo plano); acompanhe pelos
+logs do `app` — falhas aparecem como `[licitações] sincronização de <UF> falhou`. Se o container reiniciar
+durante uma sincronização, basta pedi-la de novo na página.
+
 ## Checklist de produção
 
 - [ ] `SESSION_SECRET`, `MYSQL_PASSWORD` e `MYSQL_ROOT_PASSWORD` fortes e únicos
