@@ -8,7 +8,7 @@ Usuário ──HTTPS──▶ Cloudflare (DNS, TLS, WAF, Bot Fight Mode, rate li
                         ▼
               VPS com Docker Compose
               ├── cloudflared  → encaminha para http://app:3000
-              ├── app          → Next.js (imagem ghcr.io/heloyse19/synergy), roda `prisma migrate deploy` ao iniciar
+              ├── app          → Next.js (imagem ghcr.io/synergy-pi/synergy), roda `prisma migrate deploy` ao iniciar
               └── db           → MySQL 8 (volume persistente)
 ```
 
@@ -42,9 +42,10 @@ sudo ufw allow OpenSSH && sudo ufw --force enable
 # diretório da aplicação
 sudo mkdir -p /opt/synergy && sudo chown $USER:$USER /opt/synergy
 cd /opt/synergy
-curl -fsSLO https://raw.githubusercontent.com/Heloyse19/Synergy/main/docker-compose.prod.yml
-curl -fsSL https://raw.githubusercontent.com/Heloyse19/Synergy/main/.env.production.example -o .env
-nano .env   # preencha senhas (use `openssl rand -base64 32`), APP_URL e, depois, os tokens da Cloudflare
+curl -fsSLO https://raw.githubusercontent.com/Synergy-PI/Synergy/main/docker-compose.prod.yml
+curl -fsSL https://raw.githubusercontent.com/Synergy-PI/Synergy/main/.env.production.example -o .env
+nano .env   # preencha senhas e segredos (os comandos estão no arquivo), APP_URL e, depois, os tokens da Cloudflare
+chmod 600 .env
 ```
 
 Crie também um usuário dedicado para o deploy automático (opcional, mas recomendado):
@@ -78,12 +79,14 @@ docker compose -f docker-compose.prod.yml logs -f app   # aguarde "iniciando Nex
 ```
 
 Acesse `https://synergy.seudominio.com.br`. Se a imagem ainda não existir no GHCR, faça o primeiro push na
-`main` (o pipeline a publica) ou construa localmente: `docker build -t ghcr.io/heloyse19/synergy:latest .`
+`main` (o pipeline a publica) ou construa localmente: `docker build -t ghcr.io/synergy-pi/synergy:latest .`
 e `docker push` (requer `docker login ghcr.io` com um token com escopo `write:packages`).
 
 Pacotes do GHCR são privados por padrão. Para o servidor fazer `pull`, torne o pacote público
 (GitHub → Packages → synergy → Package settings → _Change visibility_) **ou** faça `docker login ghcr.io`
 no servidor com um token de leitura (`read:packages`). O pipeline já faz esse login durante o deploy.
+Em organizações, a opção _Public_ só fica disponível se estiver liberada em Settings da organização →
+Packages → _Package creation_.
 
 ### Carregar dados de demonstração (opcional)
 
@@ -91,7 +94,7 @@ A imagem de produção não inclui o seed. Para carregar nichos, roadmap, templa
 seed a partir do código-fonte usando a rede interna do Compose:
 
 ```bash
-cd /opt/synergy && git clone https://github.com/Heloyse19/Synergy.git src && cd src
+cd /opt/synergy && git clone https://github.com/Synergy-PI/Synergy.git src && cd src
 docker run --rm -it --network synergy_internal -v "$PWD":/app -w /app \
   -e DATABASE_URL="mysql://synergy:SUA_SENHA@db:3306/synergy" -e SEED_ADMIN_PASSWORD="SenhaDoAdmin" \
   node:22-alpine sh -c "npm ci && npm run db:seed"
@@ -154,7 +157,7 @@ O workflow `.github/workflows/ci-cd.yml` tem três etapas:
 | Job       | Quando                        | O que faz                                                                   |
 | --------- | ----------------------------- | --------------------------------------------------------------------------- |
 | `quality` | todo push e PR                | `npm ci`, lint, typecheck, testes, build; em PRs também valida o Dockerfile |
-| `docker`  | push na `main`                | publica `ghcr.io/heloyse19/synergy:latest` e `:sha-<commit>`                |
+| `docker`  | push na `main`                | publica `ghcr.io/synergy-pi/synergy:latest` e `:sha-<commit>`               |
 | `deploy`  | push na `main`, após `docker` | SSH no servidor → `docker compose pull && up -d` → verifica `/api/health`   |
 
 Configure em **Settings → Environments → New environment** `production` (opcionalmente com
@@ -171,6 +174,50 @@ _Required reviewers_ para aprovar deploys manualmente) e adicione:
 Sem esses secrets o job de deploy é **ignorado com um aviso** (o CI e a publicação da imagem continuam
 funcionando), então o pipeline pode ser adotado em etapas.
 
+### Alternativa sem secrets: a VPS busca a imagem nova
+
+Em repositório público, a opção mais simples é não dar ao GitHub nenhum acesso ao servidor: o pipeline só
+publica a imagem e um _timer_ do systemd na VPS verifica a cada 5 minutos se há versão nova. Não usa runner,
+SSH nem secrets (o job `deploy` continua sendo ignorado) e exige apenas que o servidor consiga fazer `pull`
+da imagem.
+
+```bash
+sudo tee /etc/systemd/system/synergy-update.service >/dev/null <<'EOF'
+[Unit]
+Description=Atualiza o Synergy para a imagem mais recente
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/synergy
+ExecStart=/usr/bin/docker compose -f docker-compose.prod.yml pull --quiet app
+ExecStart=/usr/bin/docker compose -f docker-compose.prod.yml up -d --remove-orphans
+ExecStart=/usr/bin/docker image prune -f
+EOF
+
+sudo tee /etc/systemd/system/synergy-update.timer >/dev/null <<'EOF'
+[Unit]
+Description=Verifica atualizacao do Synergy a cada 5 minutos
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+RandomizedDelaySec=30
+
+[Install]
+WantedBy=timers.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now synergy-update.timer
+```
+
+O `up -d` só recria o container quando a imagem mudou. Para atualizar na hora, sem esperar o timer:
+`sudo systemctl start synergy-update.service`; o histórico fica em `journalctl -u synergy-update.service`.
+O timer atualiza apenas a imagem: se o `docker-compose.prod.yml` mudar no repositório, baixe-o de novo no
+servidor.
+
 ### Fluxo do dia a dia
 
 1. Abra um PR → o CI roda lint, tipos, testes, build e Dockerfile.
@@ -181,8 +228,11 @@ funcionando), então o pipeline pode ser adotado em etapas.
 
 ```bash
 cd /opt/synergy
-APP_IMAGE=ghcr.io/heloyse19/synergy:sha-abc1234 docker compose -f docker-compose.prod.yml up -d app
+APP_IMAGE=ghcr.io/synergy-pi/synergy:sha-abc1234 docker compose -f docker-compose.prod.yml up -d app
 ```
+
+Com o timer de atualização ativo, fixe a versão no `.env` do servidor (`APP_IMAGE=...:sha-abc1234`) em vez de
+passá-la só no comando; caso contrário a próxima verificação volta para `latest`.
 
 Migrações são aditivas por padrão; se uma migração precisar ser revertida, crie uma nova migração que desfaça
 a mudança (nunca edite migrações já aplicadas).
