@@ -1,6 +1,6 @@
 # Synergy
 
-[![CI/CD](https://github.com/Heloyse19/Synergy/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Heloyse19/Synergy/actions/workflows/ci-cd.yml)
+[![CI/CD](https://github.com/Synergy-PI/Synergy/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Synergy-PI/Synergy/actions/workflows/ci-cd.yml)
 
 Plataforma web que conecta **startups em estágio inicial**, **profissionais** e **investidores anjo**.
 Projeto Integrador — TADS 042 Noite · Parceiro: Ecossistema de Startups e Investidores Anjo X.
@@ -43,7 +43,7 @@ burocrático guiado (recursos Premium).
 Pré-requisitos: [Node.js 22](https://nodejs.org), [Docker](https://docs.docker.com/get-docker/) e Git.
 
 ```bash
-git clone git@github.com:Heloyse19/Synergy.git
+git clone git@github.com:Synergy-PI/Synergy.git
 cd Synergy
 cp .env.example .env          # ajuste se necessário (os valores padrão funcionam com o Docker local)
 docker compose up -d          # sobe o MySQL 8 em localhost:3306
@@ -145,7 +145,8 @@ APP_PORT=3001 docker compose --profile dev up -d      # outra porta, se a 3000 j
 ## Deploy e CI/CD
 
 Cada push na branch `main` roda lint, tipos, testes e build; publica a imagem em
-`ghcr.io/heloyse19/synergy` e atualiza o servidor via SSH. O tráfego de produção passa pela **Cloudflare**
+`ghcr.io/synergy-pi/synergy` e o servidor é atualizado em seguida (por um timer na própria VPS ou via SSH
+pelo pipeline). O tráfego de produção passa pela **Cloudflare**
 (HTTPS, WAF, Bot Fight Mode e Turnstile) e chega ao servidor por um **Cloudflare Tunnel**, sem portas abertas.
 Passo a passo completo em [`docs/deploy.md`](docs/deploy.md).
 

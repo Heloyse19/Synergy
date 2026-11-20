@@ -20,7 +20,7 @@ export function SiteFooter() {
             Premium
           </Link>
           <a
-            href="https://github.com/Heloyse19/Synergy"
+            href="https://github.com/Synergy-PI/Synergy"
             className="hover:text-slate-900"
             target="_blank"
             rel="noreferrer"
